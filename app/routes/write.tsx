@@ -1,0 +1,166 @@
+import { useRef, useState } from "react";
+import { data, Form, redirect, useNavigation } from "react-router";
+import type { JSONContent } from "@tiptap/core";
+import type { Route } from "./+types/write";
+import { createSupabase, requireUser } from "../lib/supabase.server";
+import { makeExcerpt, slugify } from "../lib/render.server";
+import { PostEditor } from "../components/editor";
+
+export function meta() {
+  return [{ title: "Write — Global Threat Forum" }];
+}
+
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const { supabase, headers } = createSupabase(request);
+  await requireUser(supabase, request);
+
+  if (!params.id) {
+    return data({ post: null }, { headers });
+  }
+
+  // RLS guarantees authors only see their own unpublished posts here.
+  const { data: post } = await supabase
+    .from("posts")
+    .select("id, title, content, status, review_note")
+    .eq("id", params.id)
+    .single();
+
+  if (!post) throw data("Post not found", { status: 404 });
+  if (post.status === "published") {
+    throw data("Published posts can no longer be edited.", { status: 403 });
+  }
+  return data({ post }, { headers });
+}
+
+export async function action({ request, params }: Route.ActionArgs) {
+  const { supabase, headers } = createSupabase(request);
+  const user = await requireUser(supabase, request);
+
+  const form = await request.formData();
+  const intent = String(form.get("intent"));
+  const title = String(form.get("title") ?? "").trim();
+  let content: JSONContent;
+  try {
+    content = JSON.parse(String(form.get("content") ?? ""));
+  } catch {
+    return data({ error: "Post content was malformed." }, { status: 400, headers });
+  }
+
+  if (!title) {
+    return data({ error: "A title is required." }, { status: 400, headers });
+  }
+
+  const status = intent === "submit" ? "pending_review" : "draft";
+  const fields = {
+    title,
+    content,
+    excerpt: makeExcerpt(content),
+    status,
+    // Resubmissions clear the previous rejection note.
+    review_note: null,
+  };
+
+  if (params.id) {
+    const { error } = await supabase
+      .from("posts")
+      .update(fields)
+      .eq("id", params.id);
+    if (error) {
+      return data({ error: error.message }, { status: 400, headers });
+    }
+  } else {
+    const { error } = await supabase.from("posts").insert({
+      ...fields,
+      author_id: user.id,
+      slug: slugify(title),
+    });
+    if (error) {
+      return data({ error: error.message }, { status: 400, headers });
+    }
+  }
+
+  return redirect("/me/posts", { headers });
+}
+
+export default function Write({ loaderData, actionData }: Route.ComponentProps) {
+  const { post } = loaderData;
+  const navigation = useNavigation();
+  const contentRef = useRef<JSONContent | null>(post?.content ?? null);
+  const [title, setTitle] = useState(post?.title ?? "");
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
+  const busy = navigation.state !== "idle";
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-white">
+        {post ? "Edit post" : "Write a post"}
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Save drafts as often as you like. Submitting sends the post to the
+        moderators for review before it appears publicly.
+      </p>
+
+      {post?.status === "rejected" && post.review_note && (
+        <div className="mt-4 rounded border border-amber-700 bg-amber-950/50 p-3 text-sm text-amber-300">
+          <strong>Moderator feedback:</strong> {post.review_note}
+        </div>
+      )}
+
+      <Form
+        method="post"
+        className="mt-6 space-y-4"
+        onSubmit={() => {
+          if (hiddenInputRef.current) {
+            hiddenInputRef.current.value = JSON.stringify(
+              contentRef.current ?? { type: "doc", content: [] }
+            );
+          }
+        }}
+      >
+        <input
+          type="text"
+          name="title"
+          required
+          placeholder="Post title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-lg font-semibold text-white focus:border-emerald-500 focus:outline-none"
+        />
+
+        <PostEditor
+          initialContent={post?.content ?? null}
+          onChange={(json) => {
+            contentRef.current = json;
+          }}
+        />
+        <input ref={hiddenInputRef} type="hidden" name="content" />
+
+        {actionData?.error && (
+          <p className="text-sm text-red-400">{actionData.error}</p>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            name="intent"
+            value="draft"
+            disabled={busy}
+            className="rounded border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+          >
+            Save draft
+          </button>
+          <button
+            type="submit"
+            name="intent"
+            value="submit"
+            disabled={busy}
+            className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+          >
+            Submit for review
+          </button>
+        </div>
+      </Form>
+    </div>
+  );
+}

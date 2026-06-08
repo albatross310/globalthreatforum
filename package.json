@@ -1,0 +1,41 @@
+{
+  "name": "globalthreatforum",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "check": "node scripts/check-connection.mjs"
+  },
+  "dependencies": {
+    "@react-router/node": "7.16.0",
+    "@react-router/serve": "7.16.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.107.0",
+    "@tiptap/core": "^3.26.0",
+    "@tiptap/extension-image": "^3.26.0",
+    "@tiptap/html": "^3.26.0",
+    "@tiptap/react": "^3.26.0",
+    "@tiptap/starter-kit": "^3.26.0",
+    "dotenv": "^17.4.2",
+    "isbot": "^5.1.36",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router": "7.16.0",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "7.16.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^22",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.3"
+  }
+}
