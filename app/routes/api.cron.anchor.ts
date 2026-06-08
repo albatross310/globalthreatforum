@@ -13,7 +13,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   const db = createServiceClient();
-  const summary = { stamped: 0, confirmed: 0, errors: 0 };
+  const summary = {
+    stamped: 0,
+    confirmed: 0,
+    errors: 0,
+    notes: [] as string[],
+  };
 
   function hourIso(unixSeconds?: number) {
     const d = unixSeconds ? new Date(unixSeconds * 1000) : new Date();
@@ -24,17 +29,18 @@ export async function loader({ request }: Route.LoaderArgs) {
   // Posts and comments share the same anchoring columns, so process both tables.
   for (const table of ["posts", "comments"] as const) {
     // 1. Stamp the overnight queue.
-    const { data: queued } = await db
+    const { data: queued, error: qErr } = await db
       .from(table)
       .select("id, content_hash")
       .eq("ots_status", "queued")
       .not("content_hash", "is", null)
       .limit(25);
+    if (qErr) summary.notes.push(`${table} queued query: ${qErr.message}`);
 
     for (const row of queued ?? []) {
       try {
         const proof = await stampHash(row.content_hash);
-        await db
+        const { error: uErr } = await db
           .from(table)
           .update({
             ots_status: "pending",
@@ -42,19 +48,26 @@ export async function loader({ request }: Route.LoaderArgs) {
             anchored_at: hourIso(),
           })
           .eq("id", row.id);
-        summary.stamped++;
-      } catch {
+        if (uErr) {
+          summary.notes.push(`${table} stamp update: ${uErr.message}`);
+          summary.errors++;
+        } else {
+          summary.stamped++;
+        }
+      } catch (e) {
+        summary.notes.push(`${table} stamp: ${(e as Error).message}`);
         summary.errors++;
       }
     }
 
     // 2. Upgrade pending proofs that Bitcoin has now confirmed.
-    const { data: pending } = await db
+    const { data: pending, error: pErr } = await db
       .from(table)
       .select("id, content_hash, ots_proof")
       .eq("ots_status", "pending")
       .not("ots_proof", "is", null)
       .limit(50);
+    if (pErr) summary.notes.push(`${table} pending query: ${pErr.message}`);
 
     for (const row of pending ?? []) {
       try {
