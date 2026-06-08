@@ -47,11 +47,14 @@ export async function action({ request, params }: Route.ActionArgs) {
   const note = String(form.get("note") ?? "").trim();
 
   if (intent === "approve") {
+    // Coarsen the publish time to the hour — no exact instant stored.
+    const publishedHour = new Date();
+    publishedHour.setMinutes(0, 0, 0);
     const { error } = await supabase
       .from("posts")
       .update({
         status: "published",
-        published_at: new Date().toISOString(),
+        published_at: publishedHour.toISOString(),
         review_note: note || null,
       })
       .eq("id", params.id);

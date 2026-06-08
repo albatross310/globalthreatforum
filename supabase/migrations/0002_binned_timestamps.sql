@@ -13,17 +13,44 @@ alter table public.posts
 
 create index if not exists posts_posted_at_idx on public.posts (posted_at desc);
 
--- Backfill existing rows so displays have something to show.
+-- ---------------------------------------------------------------------------
+-- Coarsen stored row timestamps so NO exact instant ever lives in the table.
+-- ---------------------------------------------------------------------------
+
+-- New rows: hour-resolution at worst (the app overrides with the binned time).
+alter table public.posts
+  alter column created_at set default date_trunc('hour', now()),
+  alter column updated_at set default date_trunc('hour', now());
+
+-- On every update, tie updated_at to the binned posted time (never an exact
+-- instant). Falls back to the current hour if posted_at is somehow missing.
+create or replace function public.set_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at = coalesce(new.posted_at, date_trunc('hour', now()));
+  return new;
+end $$;
+
+-- Backfill existing rows so displays have something to show. (This update fires
+-- the trigger above, which coarsens their updated_at to posted_at.)
 update public.posts
-   set posted_at   = coalesce(published_at, updated_at, created_at),
+   set posted_at   = date_trunc('hour', coalesce(published_at, updated_at, created_at)),
        posted_date = coalesce(published_at, updated_at, created_at)::date,
        posted_label = 'earlier'
  where posted_at is null;
 
+-- Coarsen the timestamps the trigger doesn't touch on existing rows.
+update public.posts
+   set created_at = date_trunc('hour', created_at),
+       published_at = case when published_at is not null
+                           then date_trunc('hour', published_at) end;
+
+-- ---------------------------------------------------------------------------
 -- The public (anon) must never see exact server timestamps or the author's
 -- timezone — only the binned posted_* fields. Replace anon's blanket SELECT
 -- with a column whitelist. (authenticated keeps full access; RLS still limits
 -- which rows authors/admins can see.)
+-- ---------------------------------------------------------------------------
 revoke select on public.posts from anon;
 grant select
   (id, author_id, title, slug, content, excerpt, status,

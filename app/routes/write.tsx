@@ -93,6 +93,9 @@ export async function action({ request, params }: Route.ActionArgs) {
       ...fields,
       author_id: user.id,
       slug: slugify(title),
+      // Store binned times only — no exact creation instant.
+      created_at: postedAtIso,
+      updated_at: postedAtIso,
     });
     if (error) {
       return data({ error: error.message }, { status: 400, headers });
