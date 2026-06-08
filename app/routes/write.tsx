@@ -64,7 +64,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     content,
     excerpt: makeExcerpt(content),
     status,
-    author_tz: tz,
+    // Timezone is used to compute the bin, then discarded — never stored, so
+    // it can't leak the author's region even though anon can read the row.
     posted_at: postedAtIso,
     posted_label: bin.postedLabel,
     posted_date: bin.postedDate,
