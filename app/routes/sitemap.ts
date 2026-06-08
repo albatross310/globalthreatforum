@@ -1,9 +1,10 @@
 import type { Route } from "./+types/sitemap";
 import { createSupabase } from "../lib/supabase.server";
+import { SITE_URL } from "../lib/seo";
 
 // Lists the homepage + every published post so Google can discover them all.
 export async function loader({ request }: Route.LoaderArgs) {
-  const origin = new URL(request.url).origin;
+  const origin = SITE_URL;
   const { supabase } = createSupabase(request);
 
   const { data: posts } = await supabase

@@ -1,15 +1,17 @@
 import { data, Link } from "react-router";
 import type { Route } from "./+types/home";
 import { createSupabase } from "../lib/supabase.server";
+import { canonical } from "../lib/seo";
 
 const DESCRIPTION =
   "Community-written, moderator-reviewed analysis of global threats.";
 
-export function meta({ data: d }: Route.MetaArgs) {
-  const url = d?.url ?? "https://www.globalthreatforum.com/";
+export function meta() {
+  const url = canonical("/");
   return [
     { title: "Global Threat Forum" },
     { name: "description", content: DESCRIPTION },
+    { tagName: "link", rel: "canonical", href: url },
     { property: "og:type", content: "website" },
     { property: "og:site_name", content: "Global Threat Forum" },
     { property: "og:title", content: "Global Threat Forum" },
@@ -30,8 +32,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     .order("published_at", { ascending: false })
     .limit(30);
 
-  const url = `${new URL(request.url).origin}/`;
-  return data({ posts: posts ?? [], url }, { headers });
+  return data({ posts: posts ?? [] }, { headers });
 }
 
 function formatDate(iso: string | null) {

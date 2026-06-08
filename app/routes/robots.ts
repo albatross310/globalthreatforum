@@ -1,8 +1,8 @@
-import type { Route } from "./+types/robots";
+import { SITE_URL } from "../lib/seo";
 
 // Tells crawlers everything is fair game and where to find the sitemap.
-export function loader({ request }: Route.LoaderArgs) {
-  const origin = new URL(request.url).origin;
+export function loader() {
+  const origin = SITE_URL;
   const body = `User-agent: *
 Allow: /
 

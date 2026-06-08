@@ -2,6 +2,7 @@ import { data, Form, Link, useNavigation } from "react-router";
 import type { Route } from "./+types/post";
 import { createSupabase, getSessionUser, requireUser } from "../lib/supabase.server";
 import { firstImageSrc, renderPostHtml } from "../lib/render.server";
+import { canonical } from "../lib/seo";
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data?.post) return [{ title: "Post — Global Threat Forum" }];
@@ -9,6 +10,7 @@ export function meta({ data }: Route.MetaArgs) {
   const tags = [
     { title: `${post.title} — Global Threat Forum` },
     { name: "description", content: post.excerpt },
+    { tagName: "link", rel: "canonical", href: url },
     { property: "og:type", content: "article" },
     { property: "og:site_name", content: "Global Threat Forum" },
     { property: "og:title", content: post.title },
@@ -51,7 +53,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return data(
     {
       user,
-      url: `${new URL(request.url).origin}/posts/${post.slug}`,
+      url: canonical(`/posts/${post.slug}`),
       post: {
         id: post.id,
         title: post.title,
