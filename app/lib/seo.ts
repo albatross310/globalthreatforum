@@ -4,7 +4,7 @@
  * Centralised here so canonical tags, og:url, the sitemap, and robots.txt
  * never drift apart.
  */
-export const SITE_URL = "https://www.globalthreatforum.com";
+export const SITE_URL = "https://globalthreatforum.com";
 
 export function canonical(path = "/"): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
