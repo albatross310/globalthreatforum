@@ -52,7 +52,9 @@ update public.posts
 -- which rows authors/admins can see.)
 -- ---------------------------------------------------------------------------
 revoke select on public.posts from anon;
+-- ots_proof is public by design (that's how anyone verifies the timestamp).
 grant select
   (id, author_id, title, slug, content, excerpt, status,
-   posted_at, posted_label, posted_date, content_hash, ots_status, anchored_at)
+   posted_at, posted_label, posted_date, content_hash,
+   ots_status, ots_proof, anchored_at)
   on public.posts to anon;

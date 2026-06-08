@@ -38,7 +38,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { data: post } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, content, excerpt, status, posted_label, posted_date, profiles ( username )"
+      "id, title, slug, content, excerpt, status, posted_label, posted_date, content_hash, ots_status, anchored_at, profiles ( username )"
     )
     .eq("slug", params.slug)
     .single();
@@ -62,6 +62,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         status: post.status,
         postedLabel: post.posted_label,
         postedDate: post.posted_date,
+        slug: post.slug,
+        contentHash: post.content_hash,
+        otsStatus: post.ots_status,
+        anchoredAt: post.anchored_at,
         author: (post.profiles as any)?.username ?? "unknown",
         ogImage: firstImageSrc(post.content),
         html: renderPostHtml(post.content),
@@ -104,6 +108,61 @@ function formatDate(iso: string | null) {
   });
 }
 
+function TimestampBadge({
+  status,
+  anchoredAt,
+  slug,
+  hash,
+}: {
+  status: string | null;
+  anchoredAt: string | null;
+  slug: string;
+  hash: string | null;
+}) {
+  if (!status || status === "none") return null;
+
+  const confirmed = status === "confirmed";
+  const hasProof = confirmed || status === "pending";
+
+  return (
+    <div
+      className={`mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded border px-3 py-2 text-xs ${
+        confirmed
+          ? "border-emerald-800 bg-emerald-950/40 text-emerald-300"
+          : "border-slate-700 bg-slate-900/60 text-slate-400"
+      }`}
+    >
+      <span className="font-medium">
+        {confirmed
+          ? `⏱ Timestamp verified in Bitcoin${
+              anchoredAt ? ` — existed by ${formatDate(anchoredAt)}` : ""
+            }`
+          : "⏱ Timestamp pending Bitcoin confirmation"}
+      </span>
+      {hasProof && (
+        <a
+          href={`/api/timestamp/${slug}`}
+          className="underline hover:text-white"
+          download
+        >
+          download .ots proof
+        </a>
+      )}
+      {hash && (
+        <a
+          href="https://opentimestamps.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white"
+          title={`SHA-256: ${hash}`}
+        >
+          how to verify
+        </a>
+      )}
+    </div>
+  );
+}
+
 export default function Post({ loaderData, actionData }: Route.ComponentProps) {
   const { user, post, comments } = loaderData;
   const navigation = useNavigation();
@@ -123,6 +182,13 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
       <p className="mt-2 text-sm text-slate-500">
         by {post.author} · {postedString(post.postedLabel, post.postedDate)}
       </p>
+
+      <TimestampBadge
+        status={post.otsStatus}
+        anchoredAt={post.anchoredAt}
+        slug={post.slug}
+        hash={post.contentHash}
+      />
 
       <div
         className="prose prose-invert prose-slate mt-8 max-w-none"

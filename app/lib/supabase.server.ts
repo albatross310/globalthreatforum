@@ -4,7 +4,7 @@ import {
   parseCookieHeader,
   serializeCookieHeader,
 } from "@supabase/ssr";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "react-router";
 import ws from "ws";
 
@@ -51,6 +51,24 @@ export function createSupabase(request: Request) {
   });
 
   return { supabase, headers };
+}
+
+/**
+ * Service-role client that bypasses RLS. Use ONLY in trusted server-side jobs
+ * (the protected anchoring cron), never in a user-facing request path.
+ */
+export function createServiceClient(): SupabaseClient {
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    throw new Error(
+      "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY for the anchoring job."
+    );
+  }
+  return createClient(url, serviceKey, {
+    auth: { persistSession: false },
+    realtime: { transport: ws as unknown as typeof WebSocket },
+  });
 }
 
 /** Verified user (server-side check against Supabase Auth) plus profile. */

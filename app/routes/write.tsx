@@ -6,6 +6,7 @@ import { createSupabase, requireUser } from "../lib/supabase.server";
 import { makeExcerpt, slugify } from "../lib/render.server";
 import { binSubmission } from "../lib/posted-time";
 import { contentHash } from "../lib/hash.server";
+import { stampHash } from "../lib/ots.server";
 import { PostEditor } from "../components/editor";
 
 export function meta() {
@@ -59,6 +60,47 @@ export async function action({ request, params }: Route.ActionArgs) {
   const postedAtIso = bin.postedAt.toISOString();
 
   const status = intent === "submit" ? "pending_review" : "draft";
+  const hash = await contentHash({
+    title,
+    content,
+    authorId: user.id,
+    postedAt: postedAtIso,
+    postedLabel: bin.postedLabel,
+    postedDate: bin.postedDate,
+  });
+
+  // OpenTimestamps anchoring. Daytime posts are stamped inline now; overnight
+  // posts are queued so the daily 8am job stamps them (so the Bitcoin proof
+  // reads "morning", never the late-night hour). Any prior proof is discarded
+  // because a content/time change invalidates it.
+  const overnight =
+    bin.postedLabel === "late evening" || bin.postedLabel === "early morning";
+  let ots: {
+    ots_status: string;
+    ots_proof: string | null;
+    anchored_at: string | null;
+  } = { ots_status: "none", ots_proof: null, anchored_at: null };
+
+  if (intent === "submit") {
+    if (overnight) {
+      ots = { ots_status: "queued", ots_proof: null, anchored_at: null };
+    } else {
+      try {
+        const proof = await stampHash(hash);
+        const anchoredHour = new Date();
+        anchoredHour.setMinutes(0, 0, 0);
+        ots = {
+          ots_status: "pending",
+          ots_proof: proof,
+          anchored_at: anchoredHour.toISOString(),
+        };
+      } catch {
+        // Calendars unreachable — let the cron retry it.
+        ots = { ots_status: "queued", ots_proof: null, anchored_at: null };
+      }
+    }
+  }
+
   const fields = {
     title,
     content,
@@ -69,14 +111,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     posted_at: postedAtIso,
     posted_label: bin.postedLabel,
     posted_date: bin.postedDate,
-    content_hash: await contentHash({
-      title,
-      content,
-      authorId: user.id,
-      postedAt: postedAtIso,
-      postedLabel: bin.postedLabel,
-      postedDate: bin.postedDate,
-    }),
+    content_hash: hash,
+    ...ots,
     // Resubmissions clear the previous rejection note.
     review_note: null,
   };

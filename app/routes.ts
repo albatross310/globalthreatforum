@@ -11,6 +11,8 @@ export default [
   route("admin/review", "routes/admin-review.tsx"),
   route("admin/review/:id", "routes/admin-review-post.tsx"),
   route("api/upload", "routes/api.upload.ts"),
+  route("api/cron/anchor", "routes/api.cron.anchor.ts"),
+  route("api/timestamp/:slug", "routes/api.timestamp.ts"),
   route("robots.txt", "routes/robots.ts"),
   route("sitemap.xml", "routes/sitemap.ts"),
 ] satisfies RouteConfig;

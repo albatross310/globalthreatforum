@@ -21,6 +21,7 @@
     "@tiptap/starter-kit": "^3.26.0",
     "dotenv": "^17.4.2",
     "isbot": "^5.1.36",
+    "opentimestamps": "^0.4.9",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router": "7.16.0",
