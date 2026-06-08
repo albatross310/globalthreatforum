@@ -2,14 +2,22 @@ import { data, Link } from "react-router";
 import type { Route } from "./+types/home";
 import { createSupabase } from "../lib/supabase.server";
 
-export function meta() {
+const DESCRIPTION =
+  "Community-written, moderator-reviewed analysis of global threats.";
+
+export function meta({ data: d }: Route.MetaArgs) {
+  const url = d?.url ?? "https://www.globalthreatforum.com/";
   return [
     { title: "Global Threat Forum" },
-    {
-      name: "description",
-      content:
-        "Community-written, moderator-reviewed analysis of global threats.",
-    },
+    { name: "description", content: DESCRIPTION },
+    { property: "og:type", content: "website" },
+    { property: "og:site_name", content: "Global Threat Forum" },
+    { property: "og:title", content: "Global Threat Forum" },
+    { property: "og:description", content: DESCRIPTION },
+    { property: "og:url", content: url },
+    { name: "twitter:card", content: "summary" },
+    { name: "twitter:title", content: "Global Threat Forum" },
+    { name: "twitter:description", content: DESCRIPTION },
   ];
 }
 
@@ -22,7 +30,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     .order("published_at", { ascending: false })
     .limit(30);
 
-  return data({ posts: posts ?? [] }, { headers });
+  const url = `${new URL(request.url).origin}/`;
+  return data({ posts: posts ?? [], url }, { headers });
 }
 
 function formatDate(iso: string | null) {

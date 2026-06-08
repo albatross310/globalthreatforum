@@ -1,14 +1,31 @@
 import { data, Form, Link, useNavigation } from "react-router";
 import type { Route } from "./+types/post";
 import { createSupabase, getSessionUser, requireUser } from "../lib/supabase.server";
-import { renderPostHtml } from "../lib/render.server";
+import { firstImageSrc, renderPostHtml } from "../lib/render.server";
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data?.post) return [{ title: "Post — Global Threat Forum" }];
-  return [
-    { title: `${data.post.title} — Global Threat Forum` },
-    { name: "description", content: data.post.excerpt },
+  const { post, url } = data;
+  const tags = [
+    { title: `${post.title} — Global Threat Forum` },
+    { name: "description", content: post.excerpt },
+    { property: "og:type", content: "article" },
+    { property: "og:site_name", content: "Global Threat Forum" },
+    { property: "og:title", content: post.title },
+    { property: "og:description", content: post.excerpt },
+    { property: "og:url", content: url },
+    { name: "twitter:title", content: post.title },
+    { name: "twitter:description", content: post.excerpt },
+    {
+      name: "twitter:card",
+      content: post.ogImage ? "summary_large_image" : "summary",
+    },
   ];
+  if (post.ogImage) {
+    tags.push({ property: "og:image", content: post.ogImage });
+    tags.push({ name: "twitter:image", content: post.ogImage });
+  }
+  return tags;
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -34,6 +51,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return data(
     {
       user,
+      url: `${new URL(request.url).origin}/posts/${post.slug}`,
       post: {
         id: post.id,
         title: post.title,
@@ -41,6 +59,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         status: post.status,
         published_at: post.published_at,
         author: (post.profiles as any)?.username ?? "unknown",
+        ogImage: firstImageSrc(post.content),
         html: renderPostHtml(post.content),
       },
       comments: comments ?? [],

@@ -20,6 +20,21 @@ export function makeExcerpt(content: JSONContent, maxLength = 240): string {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
+/** First image URL in a post, used as the Open Graph preview image. */
+export function firstImageSrc(content: JSONContent): string | null {
+  let found: string | null = null;
+  const walk = (node: JSONContent) => {
+    if (found) return;
+    if (node.type === "image" && typeof node.attrs?.src === "string") {
+      found = node.attrs.src;
+      return;
+    }
+    node.content?.forEach(walk);
+  };
+  walk(content);
+  return found;
+}
+
 export function slugify(title: string): string {
   const base = title
     .toLowerCase()
