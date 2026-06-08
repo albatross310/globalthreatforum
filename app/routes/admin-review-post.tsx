@@ -2,6 +2,7 @@ import { data, Form, Link, redirect, useNavigation } from "react-router";
 import type { Route } from "./+types/admin-review-post";
 import { createSupabase, requireAdmin } from "../lib/supabase.server";
 import { renderPostHtml } from "../lib/render.server";
+import { postedString } from "../lib/posted-time";
 
 export function meta() {
   return [{ title: "Review post — Global Threat Forum" }];
@@ -13,7 +14,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const { data: post } = await supabase
     .from("posts")
-    .select("id, title, content, status, updated_at, profiles ( username )")
+    .select(
+      "id, title, content, status, posted_label, posted_date, profiles ( username )"
+    )
     .eq("id", params.id)
     .single();
 
@@ -26,7 +29,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         title: post.title,
         status: post.status,
         author: (post.profiles as any)?.username ?? "unknown",
-        updated_at: post.updated_at,
+        postedLabel: post.posted_label,
+        postedDate: post.posted_date,
         html: renderPostHtml(post.content),
       },
     },
@@ -92,8 +96,8 @@ export default function AdminReviewPost({
 
       <div className="mt-4 rounded border border-slate-800 bg-slate-900/40 p-3 text-sm text-slate-400">
         Reviewing submission by <strong>{post.author}</strong> · status:{" "}
-        {post.status.replace("_", " ")} · last updated{" "}
-        {new Date(post.updated_at).toLocaleString("en-GB")}
+        {post.status.replace("_", " ")} · posted{" "}
+        {postedString(post.postedLabel, post.postedDate)}
       </div>
 
       <h1 className="mt-6 text-3xl font-bold tracking-tight text-white">

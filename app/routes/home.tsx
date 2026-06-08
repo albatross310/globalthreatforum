@@ -2,6 +2,7 @@ import { data, Link } from "react-router";
 import type { Route } from "./+types/home";
 import { createSupabase } from "../lib/supabase.server";
 import { canonical } from "../lib/seo";
+import { postedString } from "../lib/posted-time";
 
 const DESCRIPTION =
   "Community-written, moderator-reviewed analysis of global threats.";
@@ -27,21 +28,14 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = createSupabase(request);
   const { data: posts } = await supabase
     .from("posts")
-    .select("id, title, slug, excerpt, published_at, profiles ( username )")
+    .select(
+      "id, title, slug, excerpt, posted_label, posted_date, profiles ( username )"
+    )
     .eq("status", "published")
-    .order("published_at", { ascending: false })
+    .order("posted_at", { ascending: false })
     .limit(30);
 
   return data({ posts: posts ?? [] }, { headers });
-}
-
-function formatDate(iso: string | null) {
-  if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
@@ -81,7 +75,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               </p>
               <p className="mt-3 text-xs text-slate-600">
                 by {post.profiles?.username ?? "unknown"} ·{" "}
-                {formatDate(post.published_at)}
+                {postedString(post.posted_label, post.posted_date)}
               </p>
             </li>
           ))}

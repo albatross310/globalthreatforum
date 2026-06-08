@@ -3,6 +3,7 @@ import type { Route } from "./+types/post";
 import { createSupabase, getSessionUser, requireUser } from "../lib/supabase.server";
 import { firstImageSrc, renderPostHtml } from "../lib/render.server";
 import { canonical } from "../lib/seo";
+import { postedString } from "../lib/posted-time";
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data?.post) return [{ title: "Post — Global Threat Forum" }];
@@ -37,7 +38,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { data: post } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, content, excerpt, status, published_at, profiles ( username )"
+      "id, title, slug, content, excerpt, status, posted_label, posted_date, profiles ( username )"
     )
     .eq("slug", params.slug)
     .single();
@@ -59,7 +60,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         title: post.title,
         excerpt: post.excerpt,
         status: post.status,
-        published_at: post.published_at,
+        postedLabel: post.posted_label,
+        postedDate: post.posted_date,
         author: (post.profiles as any)?.username ?? "unknown",
         ogImage: firstImageSrc(post.content),
         html: renderPostHtml(post.content),
@@ -119,7 +121,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
         {post.title}
       </h1>
       <p className="mt-2 text-sm text-slate-500">
-        by {post.author} · {formatDate(post.published_at)}
+        by {post.author} · {postedString(post.postedLabel, post.postedDate)}
       </p>
 
       <div

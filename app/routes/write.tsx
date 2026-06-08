@@ -4,6 +4,8 @@ import type { JSONContent } from "@tiptap/core";
 import type { Route } from "./+types/write";
 import { createSupabase, requireUser } from "../lib/supabase.server";
 import { makeExcerpt, slugify } from "../lib/render.server";
+import { binSubmission } from "../lib/posted-time";
+import { contentHash } from "../lib/hash.server";
 import { PostEditor } from "../components/editor";
 
 export function meta() {
@@ -50,12 +52,30 @@ export async function action({ request, params }: Route.ActionArgs) {
     return data({ error: "A title is required." }, { status: 400, headers });
   }
 
+  // Bin the submission time in the author's timezone — exact instant is never
+  // stored. The content hash commits to this binned time, not a precise one.
+  const tz = String(form.get("tz") || "UTC");
+  const bin = binSubmission(new Date(), tz);
+  const postedAtIso = bin.postedAt.toISOString();
+
   const status = intent === "submit" ? "pending_review" : "draft";
   const fields = {
     title,
     content,
     excerpt: makeExcerpt(content),
     status,
+    author_tz: tz,
+    posted_at: postedAtIso,
+    posted_label: bin.postedLabel,
+    posted_date: bin.postedDate,
+    content_hash: await contentHash({
+      title,
+      content,
+      authorId: user.id,
+      postedAt: postedAtIso,
+      postedLabel: bin.postedLabel,
+      postedDate: bin.postedDate,
+    }),
     // Resubmissions clear the previous rejection note.
     review_note: null,
   };
@@ -88,6 +108,7 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
   const contentRef = useRef<JSONContent | null>(post?.content ?? null);
   const [title, setTitle] = useState(post?.title ?? "");
   const hiddenInputRef = useRef<HTMLInputElement>(null);
+  const tzInputRef = useRef<HTMLInputElement>(null);
 
   const busy = navigation.state !== "idle";
 
@@ -116,6 +137,10 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
               contentRef.current ?? { type: "doc", content: [] }
             );
           }
+          if (tzInputRef.current) {
+            tzInputRef.current.value =
+              Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+          }
         }}
       >
         <input
@@ -135,6 +160,7 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
           }}
         />
         <input ref={hiddenInputRef} type="hidden" name="content" />
+        <input ref={tzInputRef} type="hidden" name="tz" />
 
         {actionData?.error && (
           <p className="text-sm text-red-400">{actionData.error}</p>

@@ -1,6 +1,7 @@
 import { data, Link } from "react-router";
 import type { Route } from "./+types/admin-review";
 import { createSupabase, requireAdmin } from "../lib/supabase.server";
+import { postedString } from "../lib/posted-time";
 
 export function meta() {
   return [{ title: "Review queue — Global Threat Forum" }];
@@ -12,9 +13,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const { data: posts } = await supabase
     .from("posts")
-    .select("id, title, excerpt, updated_at, profiles ( username )")
+    .select("id, title, excerpt, posted_label, posted_date, profiles ( username )")
     .eq("status", "pending_review")
-    .order("updated_at", { ascending: true });
+    .order("posted_at", { ascending: true });
 
   return data({ posts: posts ?? [] }, { headers });
 }
@@ -49,7 +50,7 @@ export default function AdminReview({ loaderData }: Route.ComponentProps) {
               </p>
               <p className="mt-2 text-xs text-slate-600">
                 by {post.profiles?.username ?? "unknown"} · submitted{" "}
-                {new Date(post.updated_at).toLocaleString("en-GB")}
+                {postedString(post.posted_label, post.posted_date)}
               </p>
             </li>
           ))}

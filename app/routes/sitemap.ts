@@ -9,15 +9,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const { data: posts } = await supabase
     .from("posts")
-    .select("slug, updated_at, published_at")
+    .select("slug, posted_at")
     .eq("status", "published")
-    .order("published_at", { ascending: false });
+    .order("posted_at", { ascending: false });
 
   const entries = [
     { loc: `${origin}/`, lastmod: null as string | null },
     ...(posts ?? []).map((p) => ({
       loc: `${origin}/posts/${p.slug}`,
-      lastmod: p.updated_at ?? p.published_at,
+      lastmod: p.posted_at,
     })),
   ];
 
