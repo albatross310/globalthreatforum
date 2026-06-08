@@ -114,6 +114,12 @@ export function binSubmission(now: Date, tz: string): Binned {
   };
 }
 
+/** Count words in plain text (used for post/comment length limits). */
+export function wordCount(text: string): number {
+  const t = text.trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
 /** Format a stored YYYY-MM-DD date for display, e.g. "9 June 2026". */
 export function formatPostedDate(dateStr: string | null): string {
   if (!dateStr) return "";

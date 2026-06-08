@@ -3,10 +3,13 @@ import { data, Form, redirect, useNavigation } from "react-router";
 import type { JSONContent } from "@tiptap/core";
 import type { Route } from "./+types/write";
 import { createSupabase, requireUser } from "../lib/supabase.server";
-import { makeExcerpt, slugify } from "../lib/render.server";
+import { makeExcerpt, postWordCount, slugify } from "../lib/render.server";
 import { binSubmission } from "../lib/posted-time";
 import { contentHash } from "../lib/hash.server";
-import { stampHash } from "../lib/ots.server";
+import { anchorOnSubmit, isOvernight } from "../lib/ots.server";
+
+const MIN_WORDS = 500;
+const MAX_WORDS = 1500;
 import { PostEditor } from "../components/editor";
 
 export function meta() {
@@ -53,6 +56,19 @@ export async function action({ request, params }: Route.ActionArgs) {
     return data({ error: "A title is required." }, { status: 400, headers });
   }
 
+  // Word limits apply when submitting for review (drafts can be any length).
+  if (intent === "submit") {
+    const words = postWordCount(content);
+    if (words < MIN_WORDS || words > MAX_WORDS) {
+      return data(
+        {
+          error: `Posts must be ${MIN_WORDS}–${MAX_WORDS} words to submit (yours is ${words}).`,
+        },
+        { status: 400, headers }
+      );
+    }
+  }
+
   // Bin the submission time in the author's timezone — exact instant is never
   // stored. The content hash commits to this binned time, not a precise one.
   const tz = String(form.get("tz") || "UTC");
@@ -69,37 +85,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     postedDate: bin.postedDate,
   });
 
-  // OpenTimestamps anchoring. Daytime posts are stamped inline now; overnight
-  // posts are queued so the daily 8am job stamps them (so the Bitcoin proof
-  // reads "morning", never the late-night hour). Any prior proof is discarded
-  // because a content/time change invalidates it.
-  const overnight =
-    bin.postedLabel === "late evening" || bin.postedLabel === "early morning";
-  let ots: {
-    ots_status: string;
-    ots_proof: string | null;
-    anchored_at: string | null;
-  } = { ots_status: "none", ots_proof: null, anchored_at: null };
-
-  if (intent === "submit") {
-    if (overnight) {
-      ots = { ots_status: "queued", ots_proof: null, anchored_at: null };
-    } else {
-      try {
-        const proof = await stampHash(hash);
-        const anchoredHour = new Date();
-        anchoredHour.setMinutes(0, 0, 0);
-        ots = {
-          ots_status: "pending",
-          ots_proof: proof,
-          anchored_at: anchoredHour.toISOString(),
-        };
-      } catch {
-        // Calendars unreachable — let the cron retry it.
-        ots = { ots_status: "queued", ots_proof: null, anchored_at: null };
-      }
-    }
-  }
+  // OpenTimestamps anchoring (only when submitting; drafts aren't anchored).
+  // Any prior proof is discarded because a content/time change invalidates it.
+  const ots =
+    intent === "submit"
+      ? await anchorOnSubmit(hash, isOvernight(bin.postedLabel))
+      : { ots_status: "none", ots_proof: null, anchored_at: null };
 
   const fields = {
     title,

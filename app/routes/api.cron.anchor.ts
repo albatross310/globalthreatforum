@@ -21,55 +21,58 @@ export async function loader({ request }: Route.LoaderArgs) {
     return d.toISOString();
   }
 
-  // 1. Stamp the overnight queue.
-  const { data: queued } = await db
-    .from("posts")
-    .select("id, content_hash")
-    .eq("ots_status", "queued")
-    .not("content_hash", "is", null)
-    .limit(25);
+  // Posts and comments share the same anchoring columns, so process both tables.
+  for (const table of ["posts", "comments"] as const) {
+    // 1. Stamp the overnight queue.
+    const { data: queued } = await db
+      .from(table)
+      .select("id, content_hash")
+      .eq("ots_status", "queued")
+      .not("content_hash", "is", null)
+      .limit(25);
 
-  for (const p of queued ?? []) {
-    try {
-      const proof = await stampHash(p.content_hash);
-      await db
-        .from("posts")
-        .update({
-          ots_status: "pending",
-          ots_proof: proof,
-          anchored_at: hourIso(),
-        })
-        .eq("id", p.id);
-      summary.stamped++;
-    } catch {
-      summary.errors++;
-    }
-  }
-
-  // 2. Upgrade pending proofs that Bitcoin has now confirmed.
-  const { data: pending } = await db
-    .from("posts")
-    .select("id, content_hash, ots_proof")
-    .eq("ots_status", "pending")
-    .not("ots_proof", "is", null)
-    .limit(50);
-
-  for (const p of pending ?? []) {
-    try {
-      const res = await upgradeProof(p.ots_proof, p.content_hash);
-      if (res.changed) {
+    for (const row of queued ?? []) {
+      try {
+        const proof = await stampHash(row.content_hash);
         await db
-          .from("posts")
+          .from(table)
           .update({
-            ots_status: "confirmed",
-            ots_proof: res.proofB64,
-            anchored_at: hourIso(res.attestedUnix ?? undefined),
+            ots_status: "pending",
+            ots_proof: proof,
+            anchored_at: hourIso(),
           })
-          .eq("id", p.id);
-        summary.confirmed++;
+          .eq("id", row.id);
+        summary.stamped++;
+      } catch {
+        summary.errors++;
       }
-    } catch {
-      summary.errors++;
+    }
+
+    // 2. Upgrade pending proofs that Bitcoin has now confirmed.
+    const { data: pending } = await db
+      .from(table)
+      .select("id, content_hash, ots_proof")
+      .eq("ots_status", "pending")
+      .not("ots_proof", "is", null)
+      .limit(50);
+
+    for (const row of pending ?? []) {
+      try {
+        const res = await upgradeProof(row.ots_proof, row.content_hash);
+        if (res.changed) {
+          await db
+            .from(table)
+            .update({
+              ots_status: "confirmed",
+              ots_proof: res.proofB64,
+              anchored_at: hourIso(res.attestedUnix ?? undefined),
+            })
+            .eq("id", row.id);
+          summary.confirmed++;
+        }
+      } catch {
+        summary.errors++;
+      }
     }
   }
 

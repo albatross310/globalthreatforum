@@ -84,8 +84,11 @@ the hour ("around 3pm"); 8pm–8am becomes "late evening" / "early morning" with
 an official time of 8am. Exact instants are never stored, so posting at odd
 hours never shows an awkward timestamp.
 
-Each post's content + binned time is hashed (SHA-256) and anchored to the
-**Bitcoin blockchain** via [OpenTimestamps](https://opentimestamps.org):
+Posts must be **500–1500 words** and comments **250–750 words** (enforced on
+submit, with a live counter while you write).
+
+Each post and comment's content + binned time is hashed (SHA-256) and anchored
+to the **Bitcoin blockchain** via [OpenTimestamps](https://opentimestamps.org):
 
 - Daytime submissions are stamped immediately; overnight ones are stamped by a
   daily 8am job (so the proof reads "morning", never the late-night hour).

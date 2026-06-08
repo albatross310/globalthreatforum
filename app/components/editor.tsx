@@ -2,6 +2,10 @@ import { useRef } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
 import { extensions, EMPTY_DOC } from "../lib/tiptap";
+import { wordCount } from "../lib/posted-time";
+
+const MIN_WORDS = 500;
+const MAX_WORDS = 1500;
 
 type ToolbarButtonProps = {
   onClick: () => void;
@@ -127,6 +131,17 @@ function Toolbar({ editor }: { editor: Editor }) {
   );
 }
 
+function WordMeter({ words }: { words: number }) {
+  const ok = words >= MIN_WORDS && words <= MAX_WORDS;
+  return (
+    <div className="flex justify-end border-t border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs">
+      <span className={ok ? "text-emerald-400" : "text-amber-400"}>
+        {words} {words === 1 ? "word" : "words"} · need {MIN_WORDS}–{MAX_WORDS}
+      </span>
+    </div>
+  );
+}
+
 type PostEditorProps = {
   initialContent: JSONContent | null;
   onChange: (json: JSONContent) => void;
@@ -156,6 +171,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         <>
           <Toolbar editor={editor} />
           <EditorContent editor={editor} />
+          <WordMeter words={wordCount(editor.getText())} />
         </>
       ) : (
         <div className="min-h-[20rem] p-4 text-slate-600">Loading editor…</div>

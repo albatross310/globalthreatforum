@@ -35,6 +35,15 @@ export function firstImageSrc(content: JSONContent): string | null {
   return found;
 }
 
+/** Count words in a post's rendered content (for the 500–1500 word limit). */
+export function postWordCount(content: JSONContent): number {
+  const text = renderPostHtml(content)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text ? text.split(/\s+/).length : 0;
+}
+
 export function slugify(title: string): string {
   const base = title
     .toLowerCase()

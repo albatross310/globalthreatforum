@@ -33,6 +33,40 @@ export async function stampHash(hashHex: string): Promise<string> {
   return serialize(detached);
 }
 
+export type AnchorFields = {
+  ots_status: string;
+  ots_proof: string | null;
+  anchored_at: string | null;
+};
+
+/**
+ * Anchoring decision at submission time, shared by posts and comments:
+ * daytime → stamp inline now; overnight → queue for the daily 8am job (so the
+ * proof never reads the late-night hour). Stamp failures fall back to queued.
+ */
+export async function anchorOnSubmit(
+  hash: string,
+  overnight: boolean
+): Promise<AnchorFields> {
+  if (overnight) return { ots_status: "queued", ots_proof: null, anchored_at: null };
+  try {
+    const proof = await stampHash(hash);
+    const hour = new Date();
+    hour.setMinutes(0, 0, 0);
+    return {
+      ots_status: "pending",
+      ots_proof: proof,
+      anchored_at: hour.toISOString(),
+    };
+  } catch {
+    return { ots_status: "queued", ots_proof: null, anchored_at: null };
+  }
+}
+
+export function isOvernight(postedLabel: string): boolean {
+  return postedLabel === "late evening" || postedLabel === "early morning";
+}
+
 export type UpgradeResult = {
   changed: boolean; // proof gained a Bitcoin attestation
   proofB64: string; // possibly-upgraded proof

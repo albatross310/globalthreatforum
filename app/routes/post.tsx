@@ -1,9 +1,15 @@
+import { useRef, useState } from "react";
 import { data, Form, Link, useNavigation } from "react-router";
 import type { Route } from "./+types/post";
 import { createSupabase, getSessionUser, requireUser } from "../lib/supabase.server";
 import { firstImageSrc, renderPostHtml } from "../lib/render.server";
 import { canonical } from "../lib/seo";
-import { postedString } from "../lib/posted-time";
+import { binSubmission, postedString, wordCount } from "../lib/posted-time";
+import { contentHash } from "../lib/hash.server";
+import { anchorOnSubmit, isOvernight } from "../lib/ots.server";
+
+const COMMENT_MIN_WORDS = 250;
+const COMMENT_MAX_WORDS = 750;
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data?.post) return [{ title: "Post — Global Threat Forum" }];
@@ -47,9 +53,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const { data: comments } = await supabase
     .from("comments")
-    .select("id, body, created_at, profiles ( username )")
+    .select(
+      "id, body, posted_label, posted_date, content_hash, ots_status, anchored_at, profiles ( username )"
+    )
     .eq("post_id", post.id)
-    .order("created_at", { ascending: true });
+    .order("posted_at", { ascending: true });
 
   return data(
     {
@@ -88,10 +96,40 @@ export async function action({ request, params }: Route.ActionArgs) {
     return data({ error: "Comment cannot be empty." }, { status: 400, headers });
   }
 
+  const words = wordCount(body);
+  if (words < COMMENT_MIN_WORDS || words > COMMENT_MAX_WORDS) {
+    return data(
+      {
+        error: `Comments must be ${COMMENT_MIN_WORDS}–${COMMENT_MAX_WORDS} words (yours is ${words}).`,
+      },
+      { status: 400, headers }
+    );
+  }
+
+  // Same binning + Bitcoin anchoring pipeline as posts.
+  const tz = String(form.get("tz") || "UTC");
+  const bin = binSubmission(new Date(), tz);
+  const postedAtIso = bin.postedAt.toISOString();
+  const hash = await contentHash({
+    title: "comment",
+    content: body,
+    authorId: user.id,
+    postedAt: postedAtIso,
+    postedLabel: bin.postedLabel,
+    postedDate: bin.postedDate,
+  });
+  const ots = await anchorOnSubmit(hash, isOvernight(bin.postedLabel));
+
   const { error } = await supabase.from("comments").insert({
     post_id: postId,
     author_id: user.id,
     body,
+    posted_at: postedAtIso,
+    posted_label: bin.postedLabel,
+    posted_date: bin.postedDate,
+    content_hash: hash,
+    ...ots,
+    created_at: postedAtIso,
   });
   if (error) {
     return data({ error: error.message }, { status: 400, headers });
@@ -111,13 +149,15 @@ function formatDate(iso: string | null) {
 function TimestampBadge({
   status,
   anchoredAt,
-  slug,
+  downloadHref,
   hash,
+  compact = false,
 }: {
   status: string | null;
   anchoredAt: string | null;
-  slug: string;
+  downloadHref: string;
   hash: string | null;
+  compact?: boolean;
 }) {
   if (!status || status === "none") return null;
 
@@ -126,7 +166,9 @@ function TimestampBadge({
 
   return (
     <div
-      className={`mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded border px-3 py-2 text-xs ${
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded border px-3 py-2 ${
+        compact ? "mt-2 text-[11px]" : "mt-3 text-xs"
+      } ${
         confirmed
           ? "border-emerald-800 bg-emerald-950/40 text-emerald-300"
           : "border-slate-700 bg-slate-900/60 text-slate-400"
@@ -140,11 +182,7 @@ function TimestampBadge({
           : "⏱ Timestamp pending Bitcoin confirmation"}
       </span>
       {hasProof && (
-        <a
-          href={`/api/timestamp/${slug}`}
-          className="underline hover:text-white"
-          download
-        >
+        <a href={downloadHref} className="underline hover:text-white" download>
           download .ots proof
         </a>
       )}
@@ -160,6 +198,60 @@ function TimestampBadge({
         </a>
       )}
     </div>
+  );
+}
+
+function CommentForm({
+  postId,
+  error,
+  busy,
+}: {
+  postId: string;
+  error: string | null;
+  busy: boolean;
+}) {
+  const [body, setBody] = useState("");
+  const tzRef = useRef<HTMLInputElement>(null);
+  const words = wordCount(body);
+  const ok = words >= COMMENT_MIN_WORDS && words <= COMMENT_MAX_WORDS;
+
+  return (
+    <Form
+      method="post"
+      className="mt-6"
+      onSubmit={() => {
+        if (tzRef.current) {
+          tzRef.current.value =
+            Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        }
+      }}
+    >
+      <input type="hidden" name="postId" value={postId} />
+      <input type="hidden" name="tz" ref={tzRef} />
+      <textarea
+        name="body"
+        required
+        rows={6}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder={`Add a comment (${COMMENT_MIN_WORDS}–${COMMENT_MAX_WORDS} words)…`}
+        className="w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-emerald-500 focus:outline-none"
+      />
+      <div className="mt-1 flex items-center justify-between">
+        <span className={`text-xs ${ok ? "text-emerald-400" : "text-amber-400"}`}>
+          {words} {words === 1 ? "word" : "words"} · need {COMMENT_MIN_WORDS}–
+          {COMMENT_MAX_WORDS}
+        </span>
+        {error && <p className="text-sm text-red-400">{error}</p>}
+      </div>
+      <button
+        type="submit"
+        disabled={busy}
+        className="mt-2 rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+      >
+        Comment
+      </button>
+    </Form>
   );
 }
 
@@ -186,7 +278,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
       <TimestampBadge
         status={post.otsStatus}
         anchoredAt={post.anchoredAt}
-        slug={post.slug}
+        downloadHref={`/api/timestamp/${post.slug}`}
         hash={post.contentHash}
       />
 
@@ -207,37 +299,31 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
                 key={comment.id}
                 className="rounded-lg border border-slate-800 bg-slate-900/50 p-4"
               >
-                <p className="text-sm text-slate-300">{comment.body}</p>
+                <p className="whitespace-pre-wrap text-sm text-slate-300">
+                  {comment.body}
+                </p>
                 <p className="mt-2 text-xs text-slate-600">
                   {comment.profiles?.username ?? "unknown"} ·{" "}
-                  {formatDate(comment.created_at)}
+                  {postedString(comment.posted_label, comment.posted_date)}
                 </p>
+                <TimestampBadge
+                  status={comment.ots_status}
+                  anchoredAt={comment.anchored_at}
+                  downloadHref={`/api/timestamp/comment/${comment.id}`}
+                  hash={comment.content_hash}
+                  compact
+                />
               </li>
             ))}
           </ul>
 
           {user ? (
-            <Form method="post" className="mt-6">
-              <input type="hidden" name="postId" value={post.id} />
-              <textarea
-                name="body"
-                required
-                rows={3}
-                placeholder="Add a comment…"
-                key={comments.length /* reset after successful submit */}
-                className="w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-emerald-500 focus:outline-none"
-              />
-              {actionData?.error && (
-                <p className="mt-1 text-sm text-red-400">{actionData.error}</p>
-              )}
-              <button
-                type="submit"
-                disabled={navigation.state !== "idle"}
-                className="mt-2 rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
-              >
-                Comment
-              </button>
-            </Form>
+            <CommentForm
+              key={comments.length /* remount to clear after submit */}
+              postId={post.id}
+              error={actionData?.error ?? null}
+              busy={navigation.state !== "idle"}
+            />
           ) : (
             <p className="mt-6 text-sm text-slate-500">
               <Link to="/login" className="text-emerald-400 hover:underline">
