@@ -2,7 +2,6 @@
 -- Each statement is on its own line (paste-safe). Run in the SQL editor.
 
 alter table public.comments add column if not exists status text not null default 'pending_review' check (status in ('pending_review','published','rejected'));
-alter table public.comments add column if not exists review_note text;
 update public.comments set status = 'published' where status = 'pending_review';
 create index if not exists comments_status_idx on public.comments (status);
 grant update on public.comments to authenticated;

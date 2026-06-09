@@ -197,6 +197,12 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
           <p className="text-sm text-rose-600">{actionData.error}</p>
         )}
 
+        <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          ⚠ Once a moderator publishes it, a post is <strong>permanent</strong> —
+          it can't be edited or deleted. (Drafts can be deleted any time before
+          then.)
+        </p>
+
         <div className="flex gap-3">
           <button
             type="submit"

@@ -254,6 +254,10 @@ function CommentForm({
         </span>
         {error && <p className="text-sm text-rose-600">{error}</p>}
       </div>
+      <p className="mt-2 text-xs text-amber-800">
+        ⚠ Comments are <strong>permanent</strong> once posted — they can't be
+        edited or deleted.
+      </p>
       <button
         type="submit"
         disabled={busy}
