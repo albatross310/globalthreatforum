@@ -139,7 +139,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
       <footer className="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-400">
         Global Threat Forum — open source; all posts reviewed before
-        publication.
+        publishing.
       </footer>
     </div>
   );

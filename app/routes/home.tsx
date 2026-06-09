@@ -48,7 +48,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         Latest Ideas
       </h1>
       <p className="mt-2 text-slate-600">
-        All posts and comments reviewed by a moderator before publishing.
+        All posts and comments reviewed by a moderator before publication.
       </p>
 
       {posts.length === 0 ? (
