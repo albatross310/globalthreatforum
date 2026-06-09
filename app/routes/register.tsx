@@ -42,8 +42,8 @@ export default function Register({ actionData }: Route.ComponentProps) {
   if (actionData?.confirm) {
     return (
       <div className="mx-auto max-w-sm text-center">
-        <h1 className="text-2xl font-bold text-slate-900">Check your email</h1>
-        <p className="mt-4 text-slate-500">
+        <h1 className="text-2xl font-bold text-violet-950">Check your email</h1>
+        <p className="mt-4 text-slate-600">
           We sent you a confirmation link. Click it, then{" "}
           <Link to="/login" className="text-violet-700 hover:underline">
             log in
@@ -56,13 +56,13 @@ export default function Register({ actionData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className="text-2xl font-bold text-slate-900">Sign up</h1>
-      <p className="mt-2 text-sm text-slate-500">
+      <h1 className="text-2xl font-bold text-violet-950">Sign up</h1>
+      <p className="mt-2 text-sm text-slate-600">
         Create an account to comment and submit posts for review.
       </p>
       <Form method="post" className="mt-6 space-y-4">
         <label className="block">
-          <span className="text-sm text-slate-500">Username</span>
+          <span className="text-sm text-slate-600">Username</span>
           <input
             type="text"
             name="username"
@@ -70,28 +70,28 @@ export default function Register({ actionData }: Route.ComponentProps) {
             minLength={3}
             maxLength={32}
             autoComplete="username"
-            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-900 focus:border-violet-500 focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-500">Email</span>
+          <span className="text-sm text-slate-600">Email</span>
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
-            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-900 focus:border-violet-500 focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-500">Password</span>
+          <span className="text-sm text-slate-600">Password</span>
           <input
             type="password"
             name="password"
             required
             minLength={8}
             autoComplete="new-password"
-            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-900 focus:border-violet-500 focus:outline-none"
           />
         </label>
         {actionData?.error && (
@@ -105,7 +105,7 @@ export default function Register({ actionData }: Route.ComponentProps) {
           {navigation.state === "idle" ? "Create account" : "Creating…"}
         </button>
       </Form>
-      <p className="mt-4 text-sm text-slate-500">
+      <p className="mt-4 text-sm text-slate-600">
         Already have an account?{" "}
         <Link to="/login" className="text-violet-700 hover:underline">
           Log in

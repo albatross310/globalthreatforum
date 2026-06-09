@@ -24,7 +24,7 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
       className={`rounded px-2 py-1 text-sm transition-colors ${
         active
           ? "bg-violet-600 text-white"
-          : "text-slate-700 hover:bg-violet-100"
+          : "text-slate-800 hover:bg-violet-100"
       }`}
     >
       {children}
@@ -174,7 +174,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           <WordMeter words={wordCount(editor.getText())} />
         </>
       ) : (
-        <div className="min-h-[20rem] p-4 text-slate-500">Loading editor…</div>
+        <div className="min-h-[20rem] p-4 text-slate-600">Loading editor…</div>
       )}
     </div>
   );

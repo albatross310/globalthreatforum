@@ -43,15 +43,15 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <h1 className="text-3xl font-bold tracking-tight text-violet-950">
         Latest Ideas
       </h1>
-      <p className="mt-2 text-slate-500">
+      <p className="mt-2 text-slate-600">
         Every post is reviewed by a moderator before publication.
       </p>
 
       {posts.length === 0 ? (
-        <div className="mt-12 rounded-lg border border-dashed border-stone-300 p-12 text-center text-slate-500">
+        <div className="mt-12 rounded-lg border border-dashed border-stone-300 p-12 text-center text-slate-600">
           No posts published yet.{" "}
           <Link to="/write" className="text-violet-700 hover:underline">
             Write the first one
@@ -66,14 +66,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               className="rounded-lg border border-stone-200 bg-white p-5 transition-colors hover:border-stone-300"
             >
               <Link to={`/posts/${post.slug}`}>
-                <h2 className="text-xl font-semibold text-slate-900 hover:text-violet-700">
+                <h2 className="text-xl font-semibold text-violet-950 hover:text-violet-700">
                   {post.title}
                 </h2>
               </Link>
-              <p className="mt-2 line-clamp-3 text-sm text-slate-500">
+              <p className="mt-2 line-clamp-3 text-sm text-slate-600">
                 {post.excerpt}
               </p>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-slate-600">
                 by {post.profiles?.username ?? "unknown"} ·{" "}
                 {postedString(post.posted_label, post.posted_date)}
               </p>

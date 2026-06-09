@@ -43,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-gradient-to-b from-violet-50 via-rose-50 to-amber-50 text-slate-800 antialiased">
+      <body className="min-h-screen bg-gradient-to-b from-violet-50 via-rose-50 to-amber-50 text-slate-900 antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -55,8 +55,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return `whitespace-nowrap rounded px-3 py-1.5 text-sm font-medium transition-colors ${
     isActive
-      ? "bg-violet-100 text-slate-900"
-      : "text-slate-500 hover:bg-violet-100 hover:text-slate-800"
+      ? "bg-violet-100 text-violet-950"
+      : "text-slate-600 hover:bg-violet-100 hover:text-slate-900"
   }`;
 }
 
@@ -68,11 +68,11 @@ export default function App({ loaderData }: Route.ComponentProps) {
       <header className="border-b border-stone-200 bg-white/70 backdrop-blur">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
           <Link to="/" className="mr-auto flex items-baseline gap-2">
-            <span className="text-lg font-bold tracking-tight text-slate-900">
+            <span className="text-lg font-bold tracking-tight text-violet-950">
               Global Threat Forum
             </span>
-            <span className="hidden text-xs italic text-slate-500 sm:inline">
-              thinking fast and slow
+            <span className="hidden text-xs italic text-slate-600 sm:inline">
+              thinking creatively about existential risk beyond climate change
             </span>
           </Link>
 
@@ -103,10 +103,10 @@ export default function App({ loaderData }: Route.ComponentProps) {
               action="/logout"
               className="flex items-center gap-3"
             >
-              <span className="text-sm text-slate-500">{user.username}</span>
+              <span className="text-sm text-slate-600">{user.username}</span>
               <button
                 type="submit"
-                className="whitespace-nowrap rounded border border-stone-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-violet-100"
+                className="whitespace-nowrap rounded border border-stone-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-violet-100"
               >
                 Log out
               </button>
@@ -115,7 +115,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="whitespace-nowrap rounded px-3 py-1.5 text-sm text-slate-700 hover:bg-violet-100"
+                className="whitespace-nowrap rounded px-3 py-1.5 text-sm text-slate-800 hover:bg-violet-100"
               >
                 Log in
               </Link>
@@ -161,7 +161,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
     <main className="container mx-auto p-4 pt-16">
       <h1 className="text-2xl font-bold">{message}</h1>
-      <p className="mt-2 text-slate-500">{details}</p>
+      <p className="mt-2 text-slate-600">{details}</p>
       {stack && (
         <pre className="mt-4 w-full overflow-x-auto rounded bg-white p-4 text-sm">
           <code>{stack}</code>

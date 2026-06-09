@@ -92,18 +92,18 @@ export default function AdminReviewPost({
     <div>
       <Link
         to="/admin/review"
-        className="text-sm text-slate-500 hover:text-slate-700"
+        className="text-sm text-slate-600 hover:text-slate-800"
       >
         ← Back to queue
       </Link>
 
-      <div className="mt-4 rounded border border-stone-200 bg-white p-3 text-sm text-slate-500">
+      <div className="mt-4 rounded border border-stone-200 bg-white p-3 text-sm text-slate-600">
         Reviewing submission by <strong>{post.author}</strong> · status:{" "}
         {post.status.replace("_", " ")} · posted{" "}
         {postedString(post.postedLabel, post.postedDate)}
       </div>
 
-      <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-900">
+      <h1 className="mt-6 text-3xl font-bold tracking-tight text-violet-950">
         {post.title}
       </h1>
       <div
@@ -116,13 +116,13 @@ export default function AdminReviewPost({
         className="mt-10 space-y-3 border-t border-stone-200 pt-6"
       >
         <label className="block">
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-slate-600">
             Note to the author (required when rejecting)
           </span>
           <textarea
             name="note"
             rows={3}
-            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-violet-500 focus:outline-none"
           />
         </label>
 

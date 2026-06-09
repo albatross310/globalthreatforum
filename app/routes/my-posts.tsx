@@ -52,7 +52,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">My posts</h1>
+        <h1 className="text-2xl font-bold text-violet-950">My posts</h1>
         <Link
           to="/write"
           className="rounded bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500"
@@ -62,7 +62,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
       </div>
 
       {posts.length === 0 ? (
-        <p className="mt-8 text-slate-500">
+        <p className="mt-8 text-slate-600">
           Nothing yet — write your first post.
         </p>
       ) : (
@@ -76,12 +76,12 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
                 {post.status === "published" ? (
                   <Link
                     to={`/posts/${post.slug}`}
-                    className="font-medium text-slate-900 hover:text-violet-700"
+                    className="font-medium text-violet-950 hover:text-violet-700"
                   >
                     {post.title}
                   </Link>
                 ) : (
-                  <span className="font-medium text-slate-900">{post.title}</span>
+                  <span className="font-medium text-violet-950">{post.title}</span>
                 )}
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGES[post.status] ?? ""}`}
@@ -93,7 +93,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
                   {post.status !== "published" && (
                     <Link
                       to={`/write/${post.id}`}
-                      className="rounded border border-stone-300 px-3 py-1 text-xs text-slate-700 hover:bg-violet-100"
+                      className="rounded border border-stone-300 px-3 py-1 text-xs text-slate-800 hover:bg-violet-100"
                     >
                       Edit
                     </Link>

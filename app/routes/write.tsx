@@ -145,10 +145,10 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">
+      <h1 className="text-2xl font-bold text-violet-950">
         {post ? "Edit post" : "Write a post"}
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-600">
         Save drafts as often as you like. Submitting sends the post to the
         moderators for review before it appears publicly.
       </p>
@@ -181,7 +181,7 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
           placeholder="Post title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-lg font-semibold text-slate-900 focus:border-violet-500 focus:outline-none"
+          className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-lg font-semibold text-violet-950 focus:border-violet-500 focus:outline-none"
         />
 
         <PostEditor
@@ -203,7 +203,7 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
             name="intent"
             value="draft"
             disabled={busy}
-            className="rounded border border-stone-300 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-violet-100 disabled:opacity-50"
+            className="rounded border border-stone-300 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-violet-100 disabled:opacity-50"
           >
             Save draft
           </button>

@@ -170,8 +170,8 @@ function TimestampBadge({
         compact ? "mt-2 text-[11px]" : "mt-3 text-xs"
       } ${
         confirmed
-          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-          : "border-stone-300 bg-white/70 text-slate-500"
+          ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+          : "border-stone-300 bg-white/70 text-slate-600"
       }`}
     >
       <span className="font-medium">
@@ -182,7 +182,7 @@ function TimestampBadge({
           : "⏱ Timestamp pending Bitcoin confirmation"}
       </span>
       {hasProof && (
-        <a href={downloadHref} className="underline hover:text-slate-900" download>
+        <a href={downloadHref} className="underline hover:text-violet-950" download>
           download .ots proof
         </a>
       )}
@@ -191,7 +191,7 @@ function TimestampBadge({
           href="https://opentimestamps.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-slate-900"
+          className="underline hover:text-violet-950"
           title={`SHA-256: ${hash}`}
         >
           how to verify
@@ -235,7 +235,7 @@ function CommentForm({
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={`Add a comment (${COMMENT_MIN_WORDS}–${COMMENT_MAX_WORDS} words)…`}
-        className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-violet-500 focus:outline-none"
+        className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-violet-500 focus:outline-none"
       />
       <div className="mt-1 flex items-center justify-between">
         <span className={`text-xs ${ok ? "text-emerald-600" : "text-amber-700"}`}>
@@ -268,10 +268,10 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
         </div>
       )}
 
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <h1 className="text-3xl font-bold tracking-tight text-violet-950">
         {post.title}
       </h1>
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-2 text-sm text-slate-600">
         by {post.author} · {postedString(post.postedLabel, post.postedDate)}
       </p>
 
@@ -289,7 +289,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
 
       {post.status === "published" && (
         <section className="mt-12 border-t border-stone-200 pt-8">
-          <h2 className="text-xl font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-violet-950">
             Comments ({comments.length})
           </h2>
 
@@ -299,10 +299,10 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
                 key={comment.id}
                 className="rounded-lg border border-stone-200 bg-white p-4"
               >
-                <p className="whitespace-pre-wrap text-sm text-slate-700">
+                <p className="whitespace-pre-wrap text-sm text-slate-800">
                   {comment.body}
                 </p>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-slate-600">
                   {comment.profiles?.username ?? "unknown"} ·{" "}
                   {postedString(comment.posted_label, comment.posted_date)}
                 </p>
@@ -325,7 +325,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
               busy={navigation.state !== "idle"}
             />
           ) : (
-            <p className="mt-6 text-sm text-slate-500">
+            <p className="mt-6 text-sm text-slate-600">
               <Link to="/login" className="text-violet-700 hover:underline">
                 Log in
               </Link>{" "}
