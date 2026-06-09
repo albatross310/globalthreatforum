@@ -1,36 +1,39 @@
-import OpenTimestamps from "opentimestamps";
-
 // Server-only: anchors a content hash to the Bitcoin blockchain via
 // OpenTimestamps. The proof is stored as base64; it starts "pending" (calendar
 // servers have it) and becomes "confirmed" once a Bitcoin block includes it.
+//
+// opentimestamps is CommonJS, so we load it lazily (dynamic import) only when
+// actually stamping — that keeps it out of the module graph for ordinary page
+// renders, which the dev SSR runner can't evaluate (`require` is undefined).
 
-const { DetachedTimestampFile, Ops, Context } = OpenTimestamps;
+let _ots: any;
+async function getOts() {
+  if (!_ots) {
+    const mod: any = await import("opentimestamps");
+    _ots = mod.default ?? mod;
+  }
+  return _ots;
+}
 
 function hexToBytes(hex: string): Buffer {
   return Buffer.from(hex, "hex");
 }
 
-function detachedFromHash(hashHex: string) {
-  return DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hexToBytes(hashHex));
-}
-
-function serialize(detached: any): string {
-  const ctx = new Context.StreamSerialization();
+function serialize(Ot: any, detached: any): string {
+  const ctx = new Ot.Context.StreamSerialization();
   detached.serialize(ctx);
   return Buffer.from(ctx.getOutput()).toString("base64");
 }
 
-function deserialize(proofB64: string) {
-  return DetachedTimestampFile.deserialize(
-    new Context.StreamDeserialization(Buffer.from(proofB64, "base64"))
-  );
-}
-
 /** Submit a hash to the OpenTimestamps calendars; returns a base64 pending proof. */
 export async function stampHash(hashHex: string): Promise<string> {
-  const detached = detachedFromHash(hashHex);
-  await OpenTimestamps.stamp(detached);
-  return serialize(detached);
+  const Ot = await getOts();
+  const detached = Ot.DetachedTimestampFile.fromHash(
+    new Ot.Ops.OpSHA256(),
+    hexToBytes(hashHex)
+  );
+  await Ot.stamp(detached);
+  return serialize(Ot, detached);
 }
 
 export type AnchorFields = {
@@ -78,21 +81,27 @@ export async function upgradeProof(
   proofB64: string,
   hashHex: string
 ): Promise<UpgradeResult> {
-  const detached = deserialize(proofB64);
+  const Ot = await getOts();
+  const detached = Ot.DetachedTimestampFile.deserialize(
+    new Ot.Context.StreamDeserialization(Buffer.from(proofB64, "base64"))
+  );
   let changed = false;
   try {
-    changed = await OpenTimestamps.upgrade(detached);
+    changed = await Ot.upgrade(detached);
   } catch {
     changed = false;
   }
 
-  const proof = changed ? serialize(detached) : proofB64;
+  const proof = changed ? serialize(Ot, detached) : proofB64;
 
   // Best-effort: extract the Bitcoin block time if the proof is now confirmed.
   let attestedUnix: number | null = null;
   try {
-    const original = detachedFromHash(hashHex);
-    const result: any = await OpenTimestamps.verify(detached, original);
+    const original = Ot.DetachedTimestampFile.fromHash(
+      new Ot.Ops.OpSHA256(),
+      hexToBytes(hashHex)
+    );
+    const result: any = await Ot.verify(detached, original);
     if (result) {
       const hit =
         result.bitcoin ??

@@ -35,43 +35,43 @@ export default function Login({ actionData, loaderData }: Route.ComponentProps) 
 
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className="text-2xl font-bold text-white">Log in</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Log in</h1>
       <Form method="post" className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
         <label className="block">
-          <span className="text-sm text-slate-400">Email</span>
+          <span className="text-sm text-slate-500">Email</span>
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-400">Password</span>
+          <span className="text-sm text-slate-500">Password</span>
           <input
             type="password"
             name="password"
             required
             autoComplete="current-password"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
         {actionData?.error && (
-          <p className="text-sm text-red-400">{actionData.error}</p>
+          <p className="text-sm text-rose-600">{actionData.error}</p>
         )}
         <button
           type="submit"
           disabled={navigation.state !== "idle"}
-          className="w-full rounded bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+          className="w-full rounded bg-violet-600 px-4 py-2 font-medium text-white hover:bg-violet-500 disabled:opacity-50"
         >
           {navigation.state === "idle" ? "Log in" : "Logging in…"}
         </button>
       </Form>
       <p className="mt-4 text-sm text-slate-500">
         No account?{" "}
-        <Link to="/register" className="text-emerald-400 hover:underline">
+        <Link to="/register" className="text-violet-700 hover:underline">
           Sign up
         </Link>
       </p>

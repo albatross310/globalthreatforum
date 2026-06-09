@@ -170,8 +170,8 @@ function TimestampBadge({
         compact ? "mt-2 text-[11px]" : "mt-3 text-xs"
       } ${
         confirmed
-          ? "border-emerald-800 bg-emerald-950/40 text-emerald-300"
-          : "border-slate-700 bg-slate-900/60 text-slate-400"
+          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+          : "border-stone-300 bg-white/70 text-slate-500"
       }`}
     >
       <span className="font-medium">
@@ -182,7 +182,7 @@ function TimestampBadge({
           : "⏱ Timestamp pending Bitcoin confirmation"}
       </span>
       {hasProof && (
-        <a href={downloadHref} className="underline hover:text-white" download>
+        <a href={downloadHref} className="underline hover:text-slate-900" download>
           download .ots proof
         </a>
       )}
@@ -191,7 +191,7 @@ function TimestampBadge({
           href="https://opentimestamps.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-white"
+          className="underline hover:text-slate-900"
           title={`SHA-256: ${hash}`}
         >
           how to verify
@@ -235,19 +235,19 @@ function CommentForm({
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={`Add a comment (${COMMENT_MIN_WORDS}–${COMMENT_MAX_WORDS} words)…`}
-        className="w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-emerald-500 focus:outline-none"
+        className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-violet-500 focus:outline-none"
       />
       <div className="mt-1 flex items-center justify-between">
-        <span className={`text-xs ${ok ? "text-emerald-400" : "text-amber-400"}`}>
+        <span className={`text-xs ${ok ? "text-violet-700" : "text-amber-700"}`}>
           {words} {words === 1 ? "word" : "words"} · need {COMMENT_MIN_WORDS}–
           {COMMENT_MAX_WORDS}
         </span>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-rose-600">{error}</p>}
       </div>
       <button
         type="submit"
         disabled={busy}
-        className="mt-2 rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+        className="mt-2 rounded bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
       >
         Comment
       </button>
@@ -262,13 +262,13 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
   return (
     <article>
       {post.status !== "published" && (
-        <div className="mb-6 rounded border border-amber-700 bg-amber-950/50 p-3 text-sm text-amber-300">
+        <div className="mb-6 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
           This post is <strong>{post.status.replace("_", " ")}</strong> — only
           you and moderators can see it.
         </div>
       )}
 
-      <h1 className="text-3xl font-bold tracking-tight text-white">
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900">
         {post.title}
       </h1>
       <p className="mt-2 text-sm text-slate-500">
@@ -283,13 +283,13 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
       />
 
       <div
-        className="prose prose-invert prose-slate mt-8 max-w-none"
+        className="prose prose-slate mt-8 max-w-none"
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
 
       {post.status === "published" && (
-        <section className="mt-12 border-t border-slate-800 pt-8">
-          <h2 className="text-xl font-semibold text-white">
+        <section className="mt-12 border-t border-stone-200 pt-8">
+          <h2 className="text-xl font-semibold text-slate-900">
             Comments ({comments.length})
           </h2>
 
@@ -297,12 +297,12 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
             {comments.map((comment: any) => (
               <li
                 key={comment.id}
-                className="rounded-lg border border-slate-800 bg-slate-900/50 p-4"
+                className="rounded-lg border border-stone-200 bg-white p-4"
               >
-                <p className="whitespace-pre-wrap text-sm text-slate-300">
+                <p className="whitespace-pre-wrap text-sm text-slate-700">
                   {comment.body}
                 </p>
-                <p className="mt-2 text-xs text-slate-600">
+                <p className="mt-2 text-xs text-slate-500">
                   {comment.profiles?.username ?? "unknown"} ·{" "}
                   {postedString(comment.posted_label, comment.posted_date)}
                 </p>
@@ -326,7 +326,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
             />
           ) : (
             <p className="mt-6 text-sm text-slate-500">
-              <Link to="/login" className="text-emerald-400 hover:underline">
+              <Link to="/login" className="text-violet-700 hover:underline">
                 Log in
               </Link>{" "}
               to join the discussion.

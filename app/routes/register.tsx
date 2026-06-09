@@ -42,10 +42,10 @@ export default function Register({ actionData }: Route.ComponentProps) {
   if (actionData?.confirm) {
     return (
       <div className="mx-auto max-w-sm text-center">
-        <h1 className="text-2xl font-bold text-white">Check your email</h1>
-        <p className="mt-4 text-slate-400">
+        <h1 className="text-2xl font-bold text-slate-900">Check your email</h1>
+        <p className="mt-4 text-slate-500">
           We sent you a confirmation link. Click it, then{" "}
-          <Link to="/login" className="text-emerald-400 hover:underline">
+          <Link to="/login" className="text-violet-700 hover:underline">
             log in
           </Link>
           .
@@ -56,13 +56,13 @@ export default function Register({ actionData }: Route.ComponentProps) {
 
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className="text-2xl font-bold text-white">Sign up</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Sign up</h1>
       <p className="mt-2 text-sm text-slate-500">
         Create an account to comment and submit posts for review.
       </p>
       <Form method="post" className="mt-6 space-y-4">
         <label className="block">
-          <span className="text-sm text-slate-400">Username</span>
+          <span className="text-sm text-slate-500">Username</span>
           <input
             type="text"
             name="username"
@@ -70,44 +70,44 @@ export default function Register({ actionData }: Route.ComponentProps) {
             minLength={3}
             maxLength={32}
             autoComplete="username"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-400">Email</span>
+          <span className="text-sm text-slate-500">Email</span>
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-400">Password</span>
+          <span className="text-sm text-slate-500">Password</span>
           <input
             type="password"
             name="password"
             required
             minLength={8}
             autoComplete="new-password"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
         {actionData?.error && (
-          <p className="text-sm text-red-400">{actionData.error}</p>
+          <p className="text-sm text-rose-600">{actionData.error}</p>
         )}
         <button
           type="submit"
           disabled={navigation.state !== "idle"}
-          className="w-full rounded bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+          className="w-full rounded bg-violet-600 px-4 py-2 font-medium text-white hover:bg-violet-500 disabled:opacity-50"
         >
           {navigation.state === "idle" ? "Create account" : "Creating…"}
         </button>
       </Form>
       <p className="mt-4 text-sm text-slate-500">
         Already have an account?{" "}
-        <Link to="/login" className="text-emerald-400 hover:underline">
+        <Link to="/login" className="text-violet-700 hover:underline">
           Log in
         </Link>
       </p>

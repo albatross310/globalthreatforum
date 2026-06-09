@@ -92,42 +92,42 @@ export default function AdminReviewPost({
     <div>
       <Link
         to="/admin/review"
-        className="text-sm text-slate-500 hover:text-slate-300"
+        className="text-sm text-slate-500 hover:text-slate-700"
       >
         ← Back to queue
       </Link>
 
-      <div className="mt-4 rounded border border-slate-800 bg-slate-900/40 p-3 text-sm text-slate-400">
+      <div className="mt-4 rounded border border-stone-200 bg-white p-3 text-sm text-slate-500">
         Reviewing submission by <strong>{post.author}</strong> · status:{" "}
         {post.status.replace("_", " ")} · posted{" "}
         {postedString(post.postedLabel, post.postedDate)}
       </div>
 
-      <h1 className="mt-6 text-3xl font-bold tracking-tight text-white">
+      <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-900">
         {post.title}
       </h1>
       <div
-        className="prose prose-invert prose-slate mt-6 max-w-none"
+        className="prose prose-slate mt-6 max-w-none"
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
 
       <Form
         method="post"
-        className="mt-10 space-y-3 border-t border-slate-800 pt-6"
+        className="mt-10 space-y-3 border-t border-stone-200 pt-6"
       >
         <label className="block">
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-slate-500">
             Note to the author (required when rejecting)
           </span>
           <textarea
             name="note"
             rows={3}
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-violet-500 focus:outline-none"
           />
         </label>
 
         {actionData?.error && (
-          <p className="text-sm text-red-400">{actionData.error}</p>
+          <p className="text-sm text-rose-600">{actionData.error}</p>
         )}
 
         <div className="flex gap-3">
@@ -136,7 +136,7 @@ export default function AdminReviewPost({
             name="intent"
             value="approve"
             disabled={busy}
-            className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+            className="rounded bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
           >
             Approve &amp; publish
           </button>
@@ -145,7 +145,7 @@ export default function AdminReviewPost({
             name="intent"
             value="reject"
             disabled={busy}
-            className="rounded bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+            className="rounded bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-50"
           >
             Reject with note
           </button>

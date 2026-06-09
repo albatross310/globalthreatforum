@@ -25,7 +25,7 @@ export default function AdminReview({ loaderData }: Route.ComponentProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white">Review queue</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Review queue</h1>
       <p className="mt-1 text-sm text-slate-500">
         Posts awaiting moderation, oldest first.
       </p>
@@ -37,18 +37,18 @@ export default function AdminReview({ loaderData }: Route.ComponentProps) {
           {posts.map((post: any) => (
             <li
               key={post.id}
-              className="rounded-lg border border-slate-800 bg-slate-900/50 p-4"
+              className="rounded-lg border border-stone-200 bg-white p-4"
             >
               <Link
                 to={`/admin/review/${post.id}`}
-                className="font-medium text-white hover:text-emerald-400"
+                className="font-medium text-slate-900 hover:text-violet-700"
               >
                 {post.title}
               </Link>
-              <p className="mt-1 line-clamp-2 text-sm text-slate-400">
+              <p className="mt-1 line-clamp-2 text-sm text-slate-500">
                 {post.excerpt}
               </p>
-              <p className="mt-2 text-xs text-slate-600">
+              <p className="mt-2 text-xs text-slate-500">
                 by {post.profiles?.username ?? "unknown"} · submitted{" "}
                 {postedString(post.posted_label, post.posted_date)}
               </p>

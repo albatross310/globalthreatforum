@@ -23,8 +23,8 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
       onClick={onClick}
       className={`rounded px-2 py-1 text-sm transition-colors ${
         active
-          ? "bg-emerald-700 text-white"
-          : "text-slate-300 hover:bg-slate-700"
+          ? "bg-violet-600 text-white"
+          : "text-slate-700 hover:bg-violet-100"
       }`}
     >
       {children}
@@ -48,7 +48,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-slate-700 bg-slate-800/80 p-2">
+    <div className="flex flex-wrap items-center gap-1 border-b border-stone-300 bg-violet-50 p-2">
       <ToolbarButton
         title="Bold"
         active={editor.isActive("bold")}
@@ -134,8 +134,8 @@ function Toolbar({ editor }: { editor: Editor }) {
 function WordMeter({ words }: { words: number }) {
   const ok = words >= MIN_WORDS && words <= MAX_WORDS;
   return (
-    <div className="flex justify-end border-t border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs">
-      <span className={ok ? "text-emerald-400" : "text-amber-400"}>
+    <div className="flex justify-end border-t border-stone-300 bg-violet-50 px-3 py-1.5 text-xs">
+      <span className={ok ? "text-violet-700" : "text-amber-700"}>
         {words} {words === 1 ? "word" : "words"} · need {MIN_WORDS}–{MAX_WORDS}
       </span>
     </div>
@@ -157,7 +157,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert prose-slate max-w-none min-h-[20rem] p-4 focus:outline-none",
+          "prose prose-slate max-w-none min-h-[20rem] p-4 focus:outline-none",
       },
     },
     onUpdate({ editor }) {
@@ -166,7 +166,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
   });
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-900">
+    <div className="overflow-hidden rounded-lg border border-stone-300 bg-white">
       {editor ? (
         <>
           <Toolbar editor={editor} />
@@ -174,7 +174,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           <WordMeter words={wordCount(editor.getText())} />
         </>
       ) : (
-        <div className="min-h-[20rem] p-4 text-slate-600">Loading editor…</div>
+        <div className="min-h-[20rem] p-4 text-slate-500">Loading editor…</div>
       )}
     </div>
   );

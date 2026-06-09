@@ -7,10 +7,10 @@ export function meta() {
 }
 
 const STATUS_BADGES: Record<string, string> = {
-  draft: "bg-slate-700 text-slate-200",
-  pending_review: "bg-amber-700 text-amber-100",
-  published: "bg-emerald-700 text-emerald-100",
-  rejected: "bg-red-800 text-red-200",
+  draft: "bg-stone-200 text-stone-700",
+  pending_review: "bg-amber-100 text-amber-800",
+  published: "bg-emerald-100 text-emerald-800",
+  rejected: "bg-rose-100 text-rose-700",
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -52,10 +52,10 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">My posts</h1>
+        <h1 className="text-2xl font-bold text-slate-900">My posts</h1>
         <Link
           to="/write"
-          className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+          className="rounded bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500"
         >
           New post
         </Link>
@@ -70,18 +70,18 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
           {posts.map((post: any) => (
             <li
               key={post.id}
-              className="rounded-lg border border-slate-800 bg-slate-900/50 p-4"
+              className="rounded-lg border border-stone-200 bg-white p-4"
             >
               <div className="flex flex-wrap items-center gap-3">
                 {post.status === "published" ? (
                   <Link
                     to={`/posts/${post.slug}`}
-                    className="font-medium text-white hover:text-emerald-400"
+                    className="font-medium text-slate-900 hover:text-violet-700"
                   >
                     {post.title}
                   </Link>
                 ) : (
-                  <span className="font-medium text-white">{post.title}</span>
+                  <span className="font-medium text-slate-900">{post.title}</span>
                 )}
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGES[post.status] ?? ""}`}
@@ -93,7 +93,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
                   {post.status !== "published" && (
                     <Link
                       to={`/write/${post.id}`}
-                      className="rounded border border-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-800"
+                      className="rounded border border-stone-300 px-3 py-1 text-xs text-slate-700 hover:bg-violet-100"
                     >
                       Edit
                     </Link>
@@ -105,7 +105,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
                         type="submit"
                         name="intent"
                         value="submit"
-                        className="rounded bg-emerald-700 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-600"
+                        className="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-600"
                       >
                         Submit for review
                       </button>
@@ -123,7 +123,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
                         type="submit"
                         name="intent"
                         value="delete"
-                        className="rounded border border-red-900 px-3 py-1 text-xs text-red-400 hover:bg-red-950"
+                        className="rounded border border-rose-300 px-3 py-1 text-xs text-rose-600 hover:bg-rose-50"
                       >
                         Delete
                       </button>
@@ -133,7 +133,7 @@ export default function MyPosts({ loaderData }: Route.ComponentProps) {
               </div>
 
               {post.status === "rejected" && post.review_note && (
-                <p className="mt-2 text-sm text-amber-400">
+                <p className="mt-2 text-sm text-amber-700">
                   Moderator: {post.review_note}
                 </p>
               )}
