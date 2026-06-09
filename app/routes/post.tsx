@@ -7,6 +7,7 @@ import { canonical } from "../lib/seo";
 import { binSubmission, postedString, wordCount } from "../lib/posted-time";
 import { contentHash } from "../lib/hash.server";
 import { anchorOnSubmit, isOvernight } from "../lib/ots.server";
+import { VerifiedMark } from "../components/verified-mark";
 
 const COMMENT_MIN_WORDS = 250;
 const COMMENT_MAX_WORDS = 750;
@@ -271,8 +272,11 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
       <h1 className="text-3xl font-bold tracking-tight text-violet-950">
         {post.title}
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
-        by {post.author} · {postedString(post.postedLabel, post.postedDate)}
+      <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <span>
+          by {post.author} · {postedString(post.postedLabel, post.postedDate)}
+        </span>
+        <VerifiedMark status={post.otsStatus} />
       </p>
 
       <TimestampBadge

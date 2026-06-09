@@ -43,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-gradient-to-b from-violet-50 via-rose-50 to-amber-50 text-slate-900 antialiased">
+      <body className="min-h-screen bg-gradient-to-b from-amber-50 via-rose-100 to-orange-100 text-slate-900 antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />

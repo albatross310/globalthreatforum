@@ -3,6 +3,7 @@ import type { Route } from "./+types/home";
 import { createSupabase } from "../lib/supabase.server";
 import { canonical } from "../lib/seo";
 import { postedString } from "../lib/posted-time";
+import { VerifiedMark } from "../components/verified-mark";
 
 const DESCRIPTION =
   "Community-written, moderator-reviewed analysis of global threats.";
@@ -29,7 +30,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { data: posts } = await supabase
     .from("posts")
     .select(
-      "id, title, slug, excerpt, posted_label, posted_date, profiles ( username )"
+      "id, title, slug, excerpt, posted_label, posted_date, ots_status, profiles ( username )"
     )
     .eq("status", "published")
     .order("posted_at", { ascending: false })
@@ -47,7 +48,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         Latest Ideas
       </h1>
       <p className="mt-2 text-slate-600">
-        All posts and comments reviewed by a moderator before publication.
+        All posts are reviewed by a moderator before publication.
       </p>
 
       {posts.length === 0 ? (
@@ -73,9 +74,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <p className="mt-2 line-clamp-3 text-sm text-slate-600">
                 {post.excerpt}
               </p>
-              <p className="mt-3 text-xs text-slate-600">
-                by {post.profiles?.username ?? "unknown"} ·{" "}
-                {postedString(post.posted_label, post.posted_date)}
+              <p className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                <span>
+                  by {post.profiles?.username ?? "unknown"} ·{" "}
+                  {postedString(post.posted_label, post.posted_date)}
+                </span>
+                <VerifiedMark status={post.ots_status} />
               </p>
             </li>
           ))}
