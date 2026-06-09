@@ -199,8 +199,8 @@ export default function Write({ loaderData, actionData }: Route.ComponentProps) 
 
         <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           Once a moderator publishes it, a post is <strong>permanent</strong> —
-          it cannot be edited or deleted. (Drafts can be deleted any time before
-          then.)
+          it cannot be edited or deleted. (Drafts can be edited or deleted at any
+          time.)
         </p>
 
         <div className="flex gap-3">
