@@ -145,9 +145,14 @@ function WordMeter({ words }: { words: number }) {
 type PostEditorProps = {
   initialContent: JSONContent | null;
   onChange: (json: JSONContent) => void;
+  showWordMeter?: boolean;
 };
 
-export function PostEditor({ initialContent, onChange }: PostEditorProps) {
+export function PostEditor({
+  initialContent,
+  onChange,
+  showWordMeter = true,
+}: PostEditorProps) {
   const editor = useEditor({
     extensions,
     content: initialContent ?? EMPTY_DOC,
@@ -171,7 +176,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         <>
           <Toolbar editor={editor} />
           <EditorContent editor={editor} />
-          <WordMeter words={wordCount(editor.getText())} />
+          {showWordMeter && <WordMeter words={wordCount(editor.getText())} />}
         </>
       ) : (
         <div className="min-h-[20rem] p-4 text-slate-600">Loading editor…</div>

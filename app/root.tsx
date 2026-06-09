@@ -80,6 +80,9 @@ export default function App({ loaderData }: Route.ComponentProps) {
             <NavLink to="/" end className={navLinkClass}>
               Posts
             </NavLink>
+            <NavLink to="/about" className={navLinkClass}>
+              About
+            </NavLink>
             {user && (
               <>
                 <NavLink to="/write" className={navLinkClass}>
