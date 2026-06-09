@@ -135,7 +135,7 @@ function WordMeter({ words }: { words: number }) {
   const ok = words >= MIN_WORDS && words <= MAX_WORDS;
   return (
     <div className="flex justify-end border-t border-stone-300 bg-violet-50 px-3 py-1.5 text-xs">
-      <span className={ok ? "text-violet-700" : "text-amber-700"}>
+      <span className={ok ? "text-emerald-600" : "text-amber-700"}>
         {words} {words === 1 ? "word" : "words"} · need {MIN_WORDS}–{MAX_WORDS}
       </span>
     </div>

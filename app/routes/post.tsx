@@ -238,7 +238,7 @@ function CommentForm({
         className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-violet-500 focus:outline-none"
       />
       <div className="mt-1 flex items-center justify-between">
-        <span className={`text-xs ${ok ? "text-violet-700" : "text-amber-700"}`}>
+        <span className={`text-xs ${ok ? "text-emerald-600" : "text-amber-700"}`}>
           {words} {words === 1 ? "word" : "words"} · need {COMMENT_MIN_WORDS}–
           {COMMENT_MAX_WORDS}
         </span>
