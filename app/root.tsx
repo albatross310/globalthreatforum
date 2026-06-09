@@ -67,7 +67,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-stone-200 bg-white/70 backdrop-blur">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
-          <Link to="/" className="mr-auto flex items-baseline gap-2">
+          <Link to="/" className="mr-auto flex items-baseline gap-4">
             <span className="text-lg font-bold tracking-tight text-violet-950">
               Global Threat Forum
             </span>
@@ -138,7 +138,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       </main>
 
       <footer className="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-400">
-        Global Threat Forum — open source; all posts are reviewed before
+        Global Threat Forum — open source; all posts reviewed before
         publication.
       </footer>
     </div>

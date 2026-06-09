@@ -58,6 +58,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       "id, body, posted_label, posted_date, content_hash, ots_status, anchored_at, profiles ( username )"
     )
     .eq("post_id", post.id)
+    .eq("status", "published")
     .order("posted_at", { ascending: true });
 
   return data(
@@ -94,7 +95,10 @@ export async function action({ request, params }: Route.ActionArgs) {
   const postId = String(form.get("postId") ?? "");
 
   if (!body) {
-    return data({ error: "Comment cannot be empty." }, { status: 400, headers });
+    return data(
+      { error: "Comment cannot be empty.", submitted: false },
+      { status: 400, headers }
+    );
   }
 
   const words = wordCount(body);
@@ -102,6 +106,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     return data(
       {
         error: `Comments must be ${COMMENT_MIN_WORDS}–${COMMENT_MAX_WORDS} words (yours is ${words}).`,
+        submitted: false,
       },
       { status: 400, headers }
     );
@@ -125,6 +130,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     post_id: postId,
     author_id: user.id,
     body,
+    status: "pending_review",
     posted_at: postedAtIso,
     posted_label: bin.postedLabel,
     posted_date: bin.postedDate,
@@ -133,9 +139,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     created_at: postedAtIso,
   });
   if (error) {
-    return data({ error: error.message }, { status: 400, headers });
+    return data(
+      { error: error.message, submitted: false },
+      { status: 400, headers }
+    );
   }
-  return data({ error: null }, { headers });
+  return data({ error: null, submitted: true }, { headers });
 }
 
 function formatDate(iso: string | null) {
@@ -322,12 +331,20 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
           </ul>
 
           {user ? (
-            <CommentForm
-              key={comments.length /* remount to clear after submit */}
-              postId={post.id}
-              error={actionData?.error ?? null}
-              busy={navigation.state !== "idle"}
-            />
+            <>
+              {actionData?.submitted && (
+                <div className="mt-6 rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
+                  Thanks — your comment was submitted and is awaiting moderator
+                  review. It'll appear here once approved.
+                </div>
+              )}
+              <CommentForm
+                key={actionData?.submitted ? "submitted" : "editing"}
+                postId={post.id}
+                error={actionData?.error ?? null}
+                busy={navigation.state !== "idle"}
+              />
+            </>
           ) : (
             <p className="mt-6 text-sm text-slate-600">
               <Link to="/login" className="text-violet-700 hover:underline">
