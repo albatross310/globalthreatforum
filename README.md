@@ -103,9 +103,13 @@ This needs two extra environment variables and a scheduled job:
 | `SUPABASE_SERVICE_ROLE_KEY` | Secret key; used **only** by the cron to bypass RLS when stamping. |
 | `CRON_SECRET` | Random string; protects `/api/cron/anchor`. Set the same value in your host. |
 
-The schedule lives in [`vercel.json`](vercel.json) (`0 8 * * *`, daily — fits
-Vercel's Hobby plan). On a non-Vercel host, hit `GET /api/cron/anchor` daily
-with header `Authorization: Bearer $CRON_SECRET`.
+The schedule lives in [`vercel.json`](vercel.json): two daily runs at `14:00`
+and `22:00` UTC — i.e. **midnight and 8am in Queensland (AEST, UTC+10)**, the end
+of the "evening" and "early morning" windows. If you run the site from a
+different timezone, shift these UTC hours by your offset. (Note: Vercel's Hobby
+plan triggers crons once/day within the hour, and allows up to 2 — this uses
+both.) On a non-Vercel host, hit `GET /api/cron/anchor` at those times with
+header `Authorization: Bearer $CRON_SECRET`.
 
 ## Deployment
 
