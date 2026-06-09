@@ -64,7 +64,7 @@ export async function anchorOnSubmit(
 }
 
 export function isOvernight(postedLabel: string): boolean {
-  return postedLabel === "late evening" || postedLabel === "early morning";
+  return postedLabel === "evening" || postedLabel === "early morning";
 }
 
 export type UpgradeResult = {

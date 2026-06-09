@@ -3,7 +3,7 @@
 
 alter table public.posts
   add column if not exists posted_at    timestamptz,  -- coarse OFFICIAL instant (8am / rounded hour)
-  add column if not exists posted_label text,         -- "around 3pm" | "late evening" | "early morning"
+  add column if not exists posted_label text,         -- "around 3pm" | "evening" | "early morning"
   add column if not exists posted_date  date,         -- author-local date to display
   add column if not exists author_tz    text,         -- IANA zone (server-only; not exposed to anon)
   add column if not exists content_hash text,         -- sha256 of {title, content, author, binned time}

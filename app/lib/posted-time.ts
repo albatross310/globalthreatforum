@@ -2,14 +2,15 @@
  * Privacy-preserving "posted" times.
  *
  * Exact submission instants are never stored or shown. Instead we bin the
- * author's LOCAL submission time into coarse buckets:
+ * author's LOCAL submission time into coarse buckets, each anchored at the END
+ * of its window so the Bitcoin proof verifies the official time:
  *   - 08:00–20:00  → rounded down to the hour ("around 3pm")
- *   - 20:00–24:00  → "late evening"   (official time = 08:00 next morning)
+ *   - 20:00–24:00  → "evening"        (official time = 00:00 / midnight)
  *   - 00:00–08:00  → "early morning"  (official time = 08:00 same morning)
  *
- * `postedAt` is the coarse OFFICIAL instant (8am, or the rounded hour) used for
- * ordering and, later, the OpenTimestamps anchor. It is safe to expose because
- * it carries no finer-than-the-bin precision.
+ * `postedAt` is the coarse OFFICIAL instant (midnight, 8am, or the rounded
+ * hour) used for ordering and the OpenTimestamps anchor. It is safe to expose
+ * because it carries no finer-than-the-bin precision.
  */
 
 const WINDOW_START = 8; // 08:00 local
@@ -98,10 +99,11 @@ export function binSubmission(now: Date, tz: string): Binned {
   }
 
   if (w.h >= WINDOW_END) {
+    // Evening (8pm–midnight): official time is midnight, anchored by the 12am job.
     const n = nextDay(w.y, w.M, w.d);
     return {
-      postedAt: zonedToUtc(n.y, n.M, n.d, WINDOW_START, 0, zone),
-      postedLabel: "late evening",
+      postedAt: zonedToUtc(n.y, n.M, n.d, 0, 0, zone),
+      postedLabel: "evening",
       postedDate: dateStr,
     };
   }
@@ -132,7 +134,7 @@ export function formatPostedDate(dateStr: string | null): string {
   });
 }
 
-/** Combined human string, e.g. "9 June 2026, late evening". */
+/** Combined human string, e.g. "9 June 2026, evening". */
 export function postedString(
   label: string | null,
   dateStr: string | null
