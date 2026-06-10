@@ -9,6 +9,8 @@ export default [
   route("about/archive/:id", "routes/about.archive-version.tsx"),
   route("login", "routes/login.tsx"),
   route("register", "routes/register.tsx"),
+  route("forgot-password", "routes/forgot-password.tsx"),
+  route("reset-password", "routes/reset-password.tsx"),
   route("logout", "routes/logout.tsx"),
   route("write/:id?", "routes/write.tsx"),
   route("me/posts", "routes/my-posts.tsx"),

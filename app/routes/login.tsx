@@ -70,6 +70,11 @@ export default function Login({ actionData, loaderData }: Route.ComponentProps) 
         </button>
       </Form>
       <p className="mt-4 text-sm text-slate-600">
+        <Link to="/forgot-password" className="text-violet-700 hover:underline">
+          Forgot your password?
+        </Link>
+      </p>
+      <p className="mt-4 text-sm text-slate-600">
         No account?{" "}
         <Link to="/register" className="text-violet-700 hover:underline">
           Sign up
