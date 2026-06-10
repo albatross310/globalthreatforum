@@ -162,12 +162,14 @@ function TimestampBadge({
   downloadHref,
   hash,
   compact = false,
+  noun = "post",
 }: {
   status: string | null;
   anchoredAt: string | null;
   downloadHref: string;
   hash: string | null;
   compact?: boolean;
+  noun?: "post" | "comment";
 }) {
   if (!status || status === "none") return null;
 
@@ -186,10 +188,12 @@ function TimestampBadge({
     >
       <span className="font-medium">
         {confirmed
-          ? `⏱ Content anchored in Bitcoin${
-              anchoredAt ? ` — provably existed by ${formatDate(anchoredAt)}` : ""
+          ? `⏱ Timestamp verified in Bitcoin${
+              anchoredAt
+                ? ` — exact ${noun} provably existed by ${formatDate(anchoredAt)}`
+                : ""
             }`
-          : "⏱ Awaiting Bitcoin confirmation"}
+          : "⏱ Timestamp pending Bitcoin confirmation"}
       </span>
       {hasProof && (
         <a href={downloadHref} className="underline hover:text-violet-950" download>
@@ -198,7 +202,7 @@ function TimestampBadge({
       )}
       {hash && (
         <a
-          href="https://opentimestamps.org"
+          href="https://en.wikipedia.org/wiki/Trusted_timestamping"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-violet-950"
@@ -329,6 +333,7 @@ export default function Post({ loaderData, actionData }: Route.ComponentProps) {
                   downloadHref={`/api/timestamp/comment/${comment.id}`}
                   hash={comment.content_hash}
                   compact
+                  noun="comment"
                 />
               </li>
             ))}
