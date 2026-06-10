@@ -54,13 +54,10 @@ export async function anchorOnSubmit(
   if (overnight) return { ots_status: "queued", ots_proof: null, anchored_at: null };
   try {
     const proof = await stampHash(hash);
-    const hour = new Date();
-    hour.setMinutes(0, 0, 0);
-    return {
-      ots_status: "pending",
-      ots_proof: proof,
-      anchored_at: hour.toISOString(),
-    };
+    // anchored_at stays null until Bitcoin confirms: it records the block time
+    // the content "provably existed by", which doesn't exist while only the
+    // calendars hold the proof. The pending badge never shows a date anyway.
+    return { ots_status: "pending", ots_proof: proof, anchored_at: null };
   } catch {
     return { ots_status: "queued", ots_proof: null, anchored_at: null };
   }
@@ -85,35 +82,38 @@ export async function upgradeProof(
   const detached = Ot.DetachedTimestampFile.deserialize(
     new Ot.Context.StreamDeserialization(Buffer.from(proofB64, "base64"))
   );
-  let changed = false;
+  const original = Ot.DetachedTimestampFile.fromHash(
+    new Ot.Ops.OpSHA256(),
+    hexToBytes(hashHex)
+  );
+
+  // verify() pulls the Bitcoin path from the calendars (it upgrades the proof
+  // in place) AND checks it against the chain in one pass, so we don't call
+  // Ot.upgrade separately — that was a second, redundant calendar fetch. A
+  // still-pending proof resolves to {} here, leaving the row untouched.
+  let result: any = {};
   try {
-    changed = await Ot.upgrade(detached);
+    result = await Ot.verify(detached, original);
   } catch {
-    changed = false;
+    result = {};
   }
 
-  const proof = changed ? serialize(Ot, detached) : proofB64;
+  const hit =
+    result &&
+    (result.bitcoin ??
+      result.litecoin ??
+      Object.values(result).find(
+        (v: any) => v && typeof v.timestamp === "number"
+      ));
+  const confirmed = !!(hit && typeof hit.timestamp === "number");
 
-  // Best-effort: extract the Bitcoin block time if the proof is now confirmed.
-  let attestedUnix: number | null = null;
-  try {
-    const original = Ot.DetachedTimestampFile.fromHash(
-      new Ot.Ops.OpSHA256(),
-      hexToBytes(hashHex)
-    );
-    const result: any = await Ot.verify(detached, original);
-    if (result) {
-      const hit =
-        result.bitcoin ??
-        result.litecoin ??
-        Object.values(result).find((v: any) => v && v.timestamp);
-      if (hit && typeof hit.timestamp === "number") attestedUnix = hit.timestamp;
-    }
-  } catch {
-    attestedUnix = null;
-  }
-
-  return { changed, proofB64: proof, attestedUnix };
+  // Only treat the proof as upgraded once Bitcoin actually attests it; then the
+  // in-place-upgraded `detached` carries the full Bitcoin path to re-serialize.
+  return {
+    changed: confirmed,
+    proofB64: confirmed ? serialize(Ot, detached) : proofB64,
+    attestedUnix: confirmed ? (hit.timestamp as number) : null,
+  };
 }
 
 /** Raw proof bytes for the downloadable .ots file. */

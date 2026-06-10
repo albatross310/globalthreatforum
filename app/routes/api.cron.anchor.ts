@@ -20,8 +20,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     notes: [] as string[],
   };
 
-  function hourIso(unixSeconds?: number) {
-    const d = unixSeconds ? new Date(unixSeconds * 1000) : new Date();
+  // Bitcoin block time, rounded down to the hour (kept coarse like posted_at).
+  function blockHourIso(unixSeconds: number) {
+    const d = new Date(unixSeconds * 1000);
     d.setMinutes(0, 0, 0);
     return d.toISOString();
   }
@@ -45,7 +46,8 @@ export async function loader({ request }: Route.LoaderArgs) {
           .update({
             ots_status: "pending",
             ots_proof: proof,
-            anchored_at: hourIso(),
+            // Filled with the block time only once Bitcoin confirms it.
+            anchored_at: null,
           })
           .eq("id", row.id);
         if (uErr) {
@@ -78,7 +80,9 @@ export async function loader({ request }: Route.LoaderArgs) {
             .update({
               ots_status: "confirmed",
               ots_proof: res.proofB64,
-              anchored_at: hourIso(res.attestedUnix ?? undefined),
+              // Record the true block time; never substitute the run time (it
+              // would overstate how tightly the content is anchored).
+              anchored_at: res.attestedUnix ? blockHourIso(res.attestedUnix) : null,
             })
             .eq("id", row.id);
           summary.confirmed++;

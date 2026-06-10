@@ -4,7 +4,10 @@ import { createSupabase } from "../lib/supabase.server";
 import { proofBytes } from "../lib/ots.server";
 
 // Serves the OpenTimestamps proof for a published post as a downloadable .ots
-// file, so anyone can verify it independently (opentimestamps.org or the CLI).
+// file. Anyone can confirm the proof anchors the post's SHA-256 content hash to
+// Bitcoin — e.g. `ots verify -d <hash> <slug>.ots`, where <hash> is shown on
+// the post page. (That proves the hash existed by the block time; rebuilding the
+// hash from the post content also needs the canonical preimage in hash.server.ts.)
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { supabase } = createSupabase(request);
   const { data: post } = await supabase

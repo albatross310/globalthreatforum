@@ -3,7 +3,9 @@ import type { Route } from "./+types/api.timestamp.comment";
 import { createSupabase } from "../lib/supabase.server";
 import { proofBytes } from "../lib/ots.server";
 
-// Serves a comment's OpenTimestamps proof as a downloadable .ots file.
+// Serves a comment's OpenTimestamps proof as a downloadable .ots file. Verify
+// the hash↔Bitcoin anchor with `ots verify -d <hash> comment-<id>.ots` (the
+// content hash is shown beside the comment).
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { supabase } = createSupabase(request);
   const { data: comment } = await supabase

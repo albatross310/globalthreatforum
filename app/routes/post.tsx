@@ -186,10 +186,10 @@ function TimestampBadge({
     >
       <span className="font-medium">
         {confirmed
-          ? `⏱ Timestamp verified in Bitcoin${
-              anchoredAt ? ` — existed by ${formatDate(anchoredAt)}` : ""
+          ? `⏱ Content anchored in Bitcoin${
+              anchoredAt ? ` — provably existed by ${formatDate(anchoredAt)}` : ""
             }`
-          : "⏱ Timestamp pending Bitcoin confirmation"}
+          : "⏱ Awaiting Bitcoin confirmation"}
       </span>
       {hasProof && (
         <a href={downloadHref} className="underline hover:text-violet-950" download>
